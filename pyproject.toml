@@ -1,0 +1,21 @@
+[project]
+name = "pptmaker"
+version = "0.1.0"
+description = "EndoRobotics company-wide PPT builder agent (Claude Code skill)"
+requires-python = ">=3.11"
+dependencies = [
+    "python-pptx>=1.0.2",
+    "pywin32>=308; platform_system == 'Windows'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

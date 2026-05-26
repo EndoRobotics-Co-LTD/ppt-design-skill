@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.pytest_cache/
+.venv/
+venv/
+
+# PowerPoint temp lock files
+~$*.pptx
+~$*.ppt
+~$*.docx
+
+# Reference의 추출된 임시 미디어 (재추출 가능)
+Reference/_extracted_media/
+
+# 사내 발표 자료 (디자인 템플릿이 아닌 실제 컨텐츠 — 배포 제외)
+Reference/Reference Data/
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Claude Code local
+.claude/settings.local.json
+
+# Generated output
+output/
+*.pptx.bak

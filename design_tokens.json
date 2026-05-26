@@ -1,0 +1,856 @@
+{
+  "templates": [
+    {
+      "file": "EndoRobotics_PPT Design 01_2026.02.pptx",
+      "slide_size": {
+        "width_cm": 33.87,
+        "height_cm": 19.05,
+        "aspect": 1.7778
+      },
+      "slide_count": 5,
+      "layout_count": 11,
+      "theme_colors": {
+        "dk1": "sys:000000",
+        "lt1": "sys:FFFFFF",
+        "dk2": "#0E2841",
+        "lt2": "#E8E8E8",
+        "accent1": "#156082",
+        "accent2": "#E97132",
+        "accent3": "#196B24",
+        "accent4": "#0F9ED5",
+        "accent5": "#A02B93",
+        "accent6": "#4EA72E",
+        "hlink": "#467886",
+        "folHlink": "#96607D"
+      },
+      "theme_fonts": {
+        "majorFont": {
+          "latin": "맑은 고딕",
+          "ea": ""
+        },
+        "minorFont": {
+          "latin": "맑은 고딕",
+          "ea": ""
+        }
+      },
+      "runtime_fonts": {
+        "families": [
+          [
+            "Helvetica",
+            1
+          ]
+        ],
+        "sizes_pt": [
+          [
+            60.0,
+            1
+          ],
+          [
+            66.0,
+            1
+          ]
+        ]
+      },
+      "layouts": [
+        {
+          "name": "제목 슬라이드",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "CENTER_TITLE (3)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "SUBTITLE (4)",
+              "name": "부제목 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "제목 및 내용",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "구역 머리글",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "콘텐츠 2개",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 3"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 4"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 5"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 6"
+            }
+          ]
+        },
+        {
+          "name": "비교",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 3"
+            },
+            {
+              "idx": 3,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 4"
+            },
+            {
+              "idx": 4,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 5"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 6"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 7"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 8"
+            }
+          ]
+        },
+        {
+          "name": "제목만",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            }
+          ]
+        },
+        {
+          "name": "빈 화면",
+          "placeholders": [
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 1"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 2"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 3"
+            }
+          ]
+        },
+        {
+          "name": "캡션 있는 콘텐츠",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 3"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 4"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 5"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 6"
+            }
+          ]
+        },
+        {
+          "name": "캡션 있는 그림",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "PICTURE (18)",
+              "name": "그림 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 3"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 4"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 5"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 6"
+            }
+          ]
+        },
+        {
+          "name": "제목 및 세로 텍스트",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "세로 텍스트 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "세로 제목 및 텍스트",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "세로 제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "세로 텍스트 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        }
+      ],
+      "slides": [
+        {
+          "index": 1,
+          "layout": "제목 슬라이드",
+          "shape_counts": {
+            "PICTURE (13)": 1,
+            "TEXT_BOX (17)": 1
+          },
+          "text_preview": [
+            "Title:"
+          ]
+        },
+        {
+          "index": 2,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1
+          },
+          "text_preview": []
+        },
+        {
+          "index": 3,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1
+          },
+          "text_preview": []
+        },
+        {
+          "index": 4,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1
+          },
+          "text_preview": []
+        },
+        {
+          "index": 5,
+          "layout": "제목 슬라이드",
+          "shape_counts": {
+            "PICTURE (13)": 1,
+            "TEXT_BOX (17)": 1
+          },
+          "text_preview": [
+            "Thank you"
+          ]
+        }
+      ]
+    },
+    {
+      "file": "EndoRobotics_PPT Design 02_2026.02.pptx",
+      "slide_size": {
+        "width_cm": 33.87,
+        "height_cm": 19.05,
+        "aspect": 1.7778
+      },
+      "slide_count": 4,
+      "layout_count": 11,
+      "theme_colors": {
+        "dk1": "sys:000000",
+        "lt1": "sys:FFFFFF",
+        "dk2": "#0E2841",
+        "lt2": "#E8E8E8",
+        "accent1": "#156082",
+        "accent2": "#E97132",
+        "accent3": "#196B24",
+        "accent4": "#0F9ED5",
+        "accent5": "#A02B93",
+        "accent6": "#4EA72E",
+        "hlink": "#467886",
+        "folHlink": "#96607D"
+      },
+      "theme_fonts": {
+        "majorFont": {
+          "latin": "맑은 고딕",
+          "ea": ""
+        },
+        "minorFont": {
+          "latin": "맑은 고딕",
+          "ea": ""
+        }
+      },
+      "runtime_fonts": {
+        "families": [
+          [
+            "Baguet Script",
+            1
+          ]
+        ],
+        "sizes_pt": [
+          [
+            80.0,
+            1
+          ]
+        ]
+      },
+      "layouts": [
+        {
+          "name": "제목 슬라이드",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "CENTER_TITLE (3)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "SUBTITLE (4)",
+              "name": "부제목 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "제목 및 내용",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "구역 머리글",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "콘텐츠 2개",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 3"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 4"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 5"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 6"
+            }
+          ]
+        },
+        {
+          "name": "비교",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 3"
+            },
+            {
+              "idx": 3,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 4"
+            },
+            {
+              "idx": 4,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 5"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 6"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 7"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 8"
+            }
+          ]
+        },
+        {
+          "name": "제목만",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            }
+          ]
+        },
+        {
+          "name": "빈 화면",
+          "placeholders": [
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 1"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 2"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 3"
+            }
+          ]
+        },
+        {
+          "name": "캡션 있는 콘텐츠",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "OBJECT (7)",
+              "name": "내용 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 3"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 4"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 5"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 6"
+            }
+          ]
+        },
+        {
+          "name": "캡션 있는 그림",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "PICTURE (18)",
+              "name": "그림 개체 틀 2"
+            },
+            {
+              "idx": 2,
+              "type": "BODY (2)",
+              "name": "텍스트 개체 틀 3"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 4"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 5"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 6"
+            }
+          ]
+        },
+        {
+          "name": "제목 및 세로 텍스트",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "세로 텍스트 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        },
+        {
+          "name": "세로 제목 및 텍스트",
+          "placeholders": [
+            {
+              "idx": 0,
+              "type": "TITLE (1)",
+              "name": "세로 제목 1"
+            },
+            {
+              "idx": 1,
+              "type": "BODY (2)",
+              "name": "세로 텍스트 개체 틀 2"
+            },
+            {
+              "idx": 10,
+              "type": "DATE (16)",
+              "name": "날짜 개체 틀 3"
+            },
+            {
+              "idx": 11,
+              "type": "FOOTER (15)",
+              "name": "바닥글 개체 틀 4"
+            },
+            {
+              "idx": 12,
+              "type": "SLIDE_NUMBER (13)",
+              "name": "슬라이드 번호 개체 틀 5"
+            }
+          ]
+        }
+      ],
+      "slides": [
+        {
+          "index": 1,
+          "layout": "제목 슬라이드",
+          "shape_counts": {
+            "AUTO_SHAPE (1)": 2,
+            "PICTURE (13)": 1,
+            "PLACEHOLDER (14)": 2
+          },
+          "text_preview": []
+        },
+        {
+          "index": 2,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1
+          },
+          "text_preview": []
+        },
+        {
+          "index": 3,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1
+          },
+          "text_preview": []
+        },
+        {
+          "index": 4,
+          "layout": "제목 슬라이드",
+          "shape_counts": {
+            "AUTO_SHAPE (1)": 1,
+            "PICTURE (13)": 1,
+            "TEXT_BOX (17)": 1
+          },
+          "text_preview": [
+            "Thank you!"
+          ]
+        }
+      ]
+    }
+  ]
+}
