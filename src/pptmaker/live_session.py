@@ -378,3 +378,82 @@ class LiveSession:
         from pptmaker.slides import process_flow
         return process_flow.add_to_live(self, title, steps,
                                          section_no=section_no, page=page)
+
+    # ---------- 사용자 커스텀 레이아웃 ----------
+
+    def list_custom_templates(self, theme: str | None = None) -> list:
+        """사용자가 user_layouts/ 에 등록한 커스텀 템플릿 목록 반환.
+
+        Args:
+            theme: None이면 모든 테마, 지정 시 그 테마만.
+        Returns:
+            CustomTemplate 객체 리스트 (name, source_file, placeholders 등).
+        """
+        from pptmaker import custom_templates
+        return custom_templates.list_templates(theme=theme)
+
+    def add_custom(self, name: str, mapping: dict[str, str] | None = None,
+                   *, theme: str | None = None) -> SlideRef:
+        """사용자 커스텀 레이아웃 슬라이드를 closing 직전에 추가.
+
+        user_layouts/<theme>_user.pptx 안의 해당 이름 슬라이드를 PowerPoint
+        프로세스 내에서 복제(임시 열기 → 복사 → 닫기)한 뒤, 현 프레젠테이션의
+        closing 직전 위치에 삽입하고 {{key}} placeholder를 mapping[key]로 치환.
+
+        Args:
+            name: manifest 또는 슬라이드 노트에 등록된 템플릿 이름.
+            mapping: {placeholder_key: text} dict. None이면 치환 없음 (raw 복제).
+            theme: 명시 시 그 테마의 user .pptx 만 검색. None이면 자동.
+
+        Raises:
+            ValueError: 등록되지 않은 name 또는 user_layouts/ 파일 없음.
+        """
+        from pptmaker import custom_templates, themes
+
+        tmpl = custom_templates.find_template(name, theme=theme)
+        if tmpl is None:
+            available = [t.name for t in custom_templates.list_templates(theme=theme)]
+            raise ValueError(
+                f"커스텀 템플릿 '{name}'을 찾을 수 없습니다.\n"
+                f"  사용 가능: {available or '(없음)'}\n"
+                f"  user_layouts/<theme>_user.pptx 안의 슬라이드 노트에 "
+                f"'pptmaker:custom name={name} placeholders=...' 메타가 있어야 합니다."
+            )
+
+        src_path = themes.USER_LAYOUTS_DIR / tmpl.source_file
+        if not src_path.exists():
+            raise ValueError(f"user_layouts 파일 없음: {src_path}")
+
+        # 소스 .pptx를 PowerPoint COM으로 열어 슬라이드 복사 → 현 prs로 paste
+        src_prs = self._app.Presentations.Open(
+            str(src_path.resolve()),
+            ReadOnly=MSO_TRUE,
+            WithWindow=MSO_FALSE,
+        )
+        try:
+            src_slide = src_prs.Slides(tmpl.source_slide_index)
+            src_slide.Copy()
+        finally:
+            src_prs.Close()
+
+        # 현 프레젠테이션의 closing 직전 위치에 paste
+        # blank_mode 가 True 면 closing이 마지막 슬라이드 → 그 직전(=slide_count)
+        # 아니면 끝에 추가
+        if getattr(self, "blank_mode", False) and self.slide_count >= 1:
+            insert_at = self.slide_count  # closing 자리, 삽입 후 closing이 뒤로 밀림
+        else:
+            insert_at = self.slide_count + 1
+        pasted = self._prs.Slides.Paste(insert_at)
+        new_slide = self._prs.Slides(insert_at)
+
+        # placeholder 치환
+        if mapping:
+            n = custom_templates.replace_placeholders_com(new_slide, mapping)
+        else:
+            n = 0
+
+        self.focus(insert_at)
+        return SlideRef(
+            index=insert_at,
+            layout_name=str(new_slide.CustomLayout.Name) if hasattr(new_slide, "CustomLayout") else f"custom:{name}",
+        )

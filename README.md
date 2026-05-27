@@ -246,6 +246,58 @@ Claude: (그 파일을 PowerPoint로 열고 끝에 슬라이드 append)
 
 ---
 
+## 🧩 사용자 커스텀 레이아웃 (각 PC 단위 fork)
+
+사내 표준 14종 외에 자기가 자주 쓰는 레이아웃을 직접 추가할 수 있어요. 추가분은 **본인 PC에만** 저장되고 (git pull 안전), 그 사람의 Claude는 새 레이아웃을 자동 인식해서 활용합니다.
+
+### 위치
+
+```
+~/.claude/skills/pptmaker/user_layouts/    ← gitignored, 사용자별 fork
+├── theme1_user.pptx                       ← 사용자가 직접 만든 .pptx (한 파일에 여러 슬라이드)
+└── manifest.json                          ← (선택) 자동 생성 가능한 메타 캐시
+```
+
+### Phase 1 — 수동 등록 (지금)
+
+1. **PowerPoint로 `user_layouts/theme1_user.pptx` 직접 만들기.** 한 파일 안에 추가하고 싶은 레이아웃들을 슬라이드로 디자인.
+2. 각 슬라이드의 텍스트박스에 **`{{key}}` 형식 placeholder** 박기 (예: `{{title}}`, `{{step1.label}}`).
+3. 그 슬라이드의 **노트(Notes) 영역**에 한 줄:
+   ```
+   pptmaker:custom name=timeline_4step placeholders=title,step1.label,step1.desc,step2.label
+   ```
+4. 저장.
+
+### 활용 흐름
+
+```
+사용자: "타임라인 4단계 슬라이드 추가해줘"
+Claude:  ↓
+         session.list_custom_templates(theme="theme1")
+         → [CustomTemplate(name="timeline_4step", placeholders=[...])]
+         사용자에게: "timeline_4step 사용할게요. 4단계 텍스트 알려주세요."
+         사용자: "디자인 → 개발 → 검증 → 배포"
+Claude:  ↓
+         session.add_custom("timeline_4step", {
+             "title": "도입 로드맵",
+             "step1.label": "디자인",
+             ...
+         })
+         → 닫힘 직전에 슬라이드 삽입, {{key}} 자동 치환
+```
+
+### Phase 2 — 대화형 등록 (향후)
+
+Claude가 사용자와 대화하며 새 레이아웃을 같이 디자인해서 user_layouts에 자동 등록하는 흐름. 현재는 미구현 — 수동 등록만 가능.
+
+### 안전성
+
+- `user_layouts/` 는 `.gitignore` 에 포함 → **`git pull` 시 사내 표준 갱신과 충돌 없음**
+- `layouts/` (사내 SSOT)는 그대로 보호 — 사용자 추가는 별도 파일에만
+- 사용자 PC 단위 fork — 다른 PC로 옮기려면 `user_layouts/` 폴더만 복사
+
+---
+
 ## 🔄 업데이트
 
 새 디자인 가이드 / 새 레이아웃 / 버그 수정이 배포되면:

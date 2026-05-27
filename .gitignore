@@ -36,3 +36,6 @@ output/
 
 # Local 작업 폴더 (디버그 PNG, 임시 스크립트, 백업 등 — 배포 불필요)
 .compare/
+
+# 사용자별 커스텀 레이아웃 (각 PC에서 추가, 사내 배포 안 함 — git pull 안전)
+user_layouts/

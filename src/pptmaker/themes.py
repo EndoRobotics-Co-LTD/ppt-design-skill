@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import Literal
 
 LAYOUTS_DIR = Path(__file__).resolve().parents[2] / "layouts"
+# 사용자별 커스텀 레이아웃 (gitignored, 각 PC 단위)
+USER_LAYOUTS_DIR = Path(__file__).resolve().parents[2] / "user_layouts"
 
 ThemeName = Literal["theme1", "theme2"]
 VALID_THEMES: frozenset[str] = frozenset({"theme1", "theme2"})
@@ -85,3 +87,20 @@ def assert_not_template(path: Path | str) -> None:
         f"  → 다른 경로(예: ~/Documents/PPTMaker/내작업.pptx) 를 지정하거나 "
         f"working_path를 비워서 자동 사본 생성을 사용하세요."
     )
+
+
+def user_template_path(theme: str | None = None) -> Path:
+    """사용자 커스텀 레이아웃 파일 경로 — user_layouts/<theme>_user.pptx.
+
+    존재하지 않아도 OK (사용자가 아직 등록 안 함).
+    경로만 반환하므로 caller에서 존재 여부 확인.
+    """
+    name = theme or DEFAULT_THEME
+    if name not in VALID_THEMES:
+        raise ValueError(f"Unknown theme: {name!r}")
+    return USER_LAYOUTS_DIR / f"{name}_user.pptx"
+
+
+def user_manifest_path() -> Path:
+    """사용자 커스텀 레이아웃 manifest.json 경로."""
+    return USER_LAYOUTS_DIR / "manifest.json"
