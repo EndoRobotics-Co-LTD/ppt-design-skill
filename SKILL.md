@@ -300,11 +300,8 @@ PPTMaker/
 │       ├── agenda.py · section_divider.py · single_column.py · ...
 │       └── ... (12 본문 레이아웃)
 ├── scripts/
-│   ├── analyze_templates.py                ← layouts/ 분석 → design_tokens.json
-│   ├── inspect_master.py                   ← 슬라이드 마스터 검사
-│   ├── verify_all.py                       ← 14종 검증 스크립트
-│   └── remove_empty_slides.py              ← 빈 슬라이드 자동 청소
-└── .claude/skills/pptmaker/SKILL.md        ← (이 파일)
+│   └── analyze_templates.py                ← layouts/ 분석 → design_tokens.json
+└── SKILL.md                                ← (이 파일 — 리포 루트에 위치)
 ```
 
 ---

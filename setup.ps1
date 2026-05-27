@@ -59,7 +59,18 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "  $check"
 
-# 6) Claude Code skills path check
+# 6) Verify SKILL.md is at repo root (required for Claude Code auto-detection)
+$skillMd = Join-Path $skillDir "SKILL.md"
+if (Test-Path $skillMd) {
+    Write-Host "  [OK] SKILL.md found at repo root — Claude Code will auto-detect" -ForegroundColor Green
+} else {
+    Write-Host "  [X] SKILL.md NOT at repo root: $skillMd" -ForegroundColor Red
+    Write-Host "      Without SKILL.md at the top level, Claude Code cannot discover this skill." -ForegroundColor Red
+    Write-Host "      Re-clone the repo or contact eunsang.lee@endorobo.com" -ForegroundColor Yellow
+    exit 1
+}
+
+# 7) Claude Code skills path check
 $claudeSkillsRoot = Join-Path $env:USERPROFILE ".claude\skills"
 if ($skillDir -like "$claudeSkillsRoot*") {
     Write-Host "  [OK] Located under user-global skills path — auto-detected by Claude Code" -ForegroundColor Green

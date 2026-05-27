@@ -195,7 +195,7 @@ Claude가 순서대로 짧게 묻습니다:
 | 다크 컬러 | `#0E2841` (네이비) |
 | 14종 레이아웃 | 모두 코드+템플릿에 강제됨 — 직원이 임의로 깰 수 없음 |
 
-상세 규칙: [`.claude/skills/pptmaker/SKILL.md`](.claude/skills/pptmaker/SKILL.md)
+상세 규칙: [`SKILL.md`](SKILL.md)
 
 ---
 
@@ -290,7 +290,7 @@ Claude Code 재시작 → 변경사항 자동 반영.
 4. `LiveSession` 에 편의 메서드 (`add_xxx`) 추가
 5. `SKILL.md` 표 갱신
 
-상세: `.claude/skills/pptmaker/SKILL.md` 의 §7 "새 레이아웃 추가 시 체크리스트"
+상세: `SKILL.md` 의 §7 "새 레이아웃 추가 시 체크리스트"
 
 ---
 
