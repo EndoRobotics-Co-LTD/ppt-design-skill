@@ -72,20 +72,31 @@ class LiveSession:
         theme: str | None = None,
         working_path: Path | str | None = None,
         name_hint: str | None = None,
+        force_overwrite: bool = False,
     ) -> "LiveSession":
         """**새 PPT 작업 시작 (권장 진입점).**
 
         layouts/ 의 템플릿을 working_path 로 **복사**한 다음, 그 사본을 연다.
         템플릿 원본은 절대 안 건드린다. blank_mode=True 자동 적용 (데모 본문 제거).
 
+        **안전 가드**:
+        - working_path 파일이 이미 존재하면 FileExistsError (force_overwrite=True 로 덮어쓸 수 있지만,
+          PowerPoint에서 사용자가 수동 편집한 내용이 사라질 수 있으니 주의).
+        - working_path가 PowerPoint에서 이미 열려있으면 RuntimeError. 후속 수정·추가 작업은
+          open_existing() 사용 권장.
+
         Args:
             theme: 'theme1' | 'theme2'. None이면 DEFAULT_THEME.
             working_path: 작업 사본을 만들 경로. None이면 자동 생성
                 ~/Documents/PPTMaker/<name>_<timestamp>.pptx
             name_hint: working_path 자동 생성 시 파일명 prefix (예: "2026Q1_보고").
+            force_overwrite: True면 기존 파일이 있어도 덮어씀 (사용자가 명시적으로
+                "처음부터 다시 만들어줘"라고 한 경우에만).
 
         Raises:
             ValueError: working_path가 layouts/ 영역 안이면 차단.
+            FileExistsError: working_path가 이미 존재 + force_overwrite=False.
+            RuntimeError: working_path가 PowerPoint에 열려있음.
         """
         from pptmaker import themes
 
@@ -94,25 +105,58 @@ class LiveSession:
             working_path = themes.default_working_path(theme, name_hint=name_hint)
         working = Path(working_path).resolve()
         themes.assert_not_template(working)
+
+        # 안전 가드 1: 동일 경로의 .pptx가 이미 있으면 차단
+        if working.exists() and not force_overwrite:
+            raise FileExistsError(
+                f"작업 파일이 이미 존재합니다: {working}\n"
+                f"  - 이어서 작업하려면: LiveSession.open_existing(r'{working}')\n"
+                f"  - 정말 덮어쓰려면: LiveSession.new(..., force_overwrite=True)\n"
+                f"    (주의: PowerPoint에서 수동 편집한 내용이 모두 사라집니다)"
+            )
+
+        # 안전 가드 2: PowerPoint에서 이미 열려있으면 차단
+        app = cls.connect_or_start()
+        target_lower = str(working).lower()
+        for prs in app.Presentations:
+            try:
+                opened_path = str(Path(prs.FullName).resolve()).lower()
+            except Exception:
+                continue
+            if opened_path == target_lower:
+                raise RuntimeError(
+                    f"이 파일이 PowerPoint에 이미 열려있습니다: {working}\n"
+                    f"  - 이어서 작업하려면: LiveSession.open_existing(r'{working}')\n"
+                    f"  - 새로 만들려면 먼저 PowerPoint에서 이 파일을 닫아주세요."
+                )
+
         working.parent.mkdir(parents=True, exist_ok=True)
         # 템플릿 → 사본 복사 (원본 보호)
         shutil.copy2(str(src), str(working))
 
-        app = cls.connect_or_start()
         prs = app.Presentations.Open(str(working), ReadOnly=MSO_FALSE, WithWindow=MSO_TRUE)
         session = cls(app, prs, blank_mode=True)
         session.clean_to_chrome()  # 데모 본문 자동 제거
         return session
 
     @classmethod
-    def open_existing(cls, path: Path | str) -> "LiveSession":
+    def open_existing(
+        cls,
+        path: Path | str,
+        *,
+        keep_last_slide: bool = True,
+    ) -> "LiveSession":
         """**사용자가 기존에 작업하던 PPT를 이어서 작업.**
 
         이미 PowerPoint에서 열려있으면 그 인스턴스에 연결. 아니면 그 파일을 연다.
-        blank_mode=False — 기존 슬라이드 보존, 끝에 append하는 기본 동작.
+        기존 슬라이드는 모두 보존됨 (사용자 수동 편집 포함).
 
         Args:
             path: 기존 .pptx 파일 절대 경로.
+            keep_last_slide: True (기본) — 마지막 슬라이드(통상 closing)를
+                보존하며 add_xxx 호출은 그 **직전**에 삽입. PPTMaker 표준 PPT 가정.
+                False — add_xxx 가 끝에 append (사용자가 closing 없는 PPT를
+                작업하거나 마지막 위치에 새 슬라이드를 두고 싶을 때).
 
         Raises:
             ValueError: layouts/ 템플릿을 가리키면 차단.
@@ -130,11 +174,11 @@ class LiveSession:
         for prs in app.Presentations:
             try:
                 if str(Path(prs.FullName).resolve()).lower() == str(target).lower():
-                    return cls(app, prs, blank_mode=False)
+                    return cls(app, prs, blank_mode=keep_last_slide)
             except Exception:
                 continue
         prs = app.Presentations.Open(str(target), ReadOnly=MSO_FALSE, WithWindow=MSO_TRUE)
-        return cls(app, prs, blank_mode=False)
+        return cls(app, prs, blank_mode=keep_last_slide)
 
     @classmethod
     def open(
@@ -268,6 +312,104 @@ class LiveSession:
 
     def save_as(self, path: Path | str) -> None:
         self._prs.SaveAs(str(Path(path).resolve()))
+
+    # ---------- 부분 수정 (PPT가 이미 만들어진 후 수정·추가) ----------
+    # 핵심 원칙: 콘텐츠 SSOT는 .pptx 자체. 매번 전체 재생성 X.
+    # 이미 만들어진 PPT의 일부만 수정할 때 사용. PowerPoint에서 사용자가
+    # 수동 편집한 내용은 그대로 보존된다.
+
+    def replace_text_in_slide(self, slide_index: int, find: str, replace: str) -> int:
+        """슬라이드 N의 모든 텍스트박스에서 `find` 문자열을 `replace`로 치환.
+
+        Args:
+            slide_index: 1-based 슬라이드 번호.
+            find: 찾을 문자열 (정확히 일치 — substring match).
+            replace: 교체할 문자열.
+
+        Returns:
+            치환된 텍스트박스 개수.
+
+        Example:
+            >>> session.replace_text_in_slide(5, "+18%", "+22%")  # KPI 카드 숫자 변경
+            1
+        """
+        if slide_index < 1 or slide_index > self.slide_count:
+            raise ValueError(
+                f"slide_index out of range: {slide_index} (slide_count={self.slide_count})"
+            )
+        slide = self._prs.Slides(slide_index)
+        count = 0
+        for shape in slide.Shapes:
+            try:
+                if shape.HasTextFrame != MSO_TRUE:
+                    continue
+                tr = shape.TextFrame.TextRange
+                original = tr.Text or ""
+                if find in original:
+                    tr.Text = original.replace(find, replace)
+                    count += 1
+            except Exception:
+                continue
+        self.focus(slide_index)
+        return count
+
+    def replace_text_global(self, find: str, replace: str) -> int:
+        """전체 슬라이드를 대상으로 텍스트 치환. 치환된 텍스트박스 총 개수 반환."""
+        total = 0
+        for i in range(1, self.slide_count + 1):
+            total += self.replace_text_in_slide(i, find, replace)
+        return total
+
+    def delete_slide(self, slide_index: int) -> None:
+        """슬라이드 N 삭제. 이후 슬라이드들은 자동 앞당겨짐.
+
+        Args:
+            slide_index: 1-based 슬라이드 번호.
+        """
+        if slide_index < 1 or slide_index > self.slide_count:
+            raise ValueError(
+                f"slide_index out of range: {slide_index} (slide_count={self.slide_count})"
+            )
+        self._prs.Slides(slide_index).Delete()
+
+    def move_slide(self, from_index: int, to_index: int) -> None:
+        """슬라이드 순서 변경. from에서 to 위치로 이동.
+
+        Args:
+            from_index: 옮길 슬라이드 (1-based).
+            to_index: 목적 위치 (1-based).
+        """
+        if from_index < 1 or from_index > self.slide_count:
+            raise ValueError(f"from_index out of range: {from_index}")
+        if to_index < 1 or to_index > self.slide_count:
+            raise ValueError(f"to_index out of range: {to_index}")
+        if from_index == to_index:
+            return
+        self._prs.Slides(from_index).MoveTo(to_index)
+        self.focus(to_index)
+
+    def get_slide_text(self, slide_index: int) -> str:
+        """슬라이드 N의 모든 텍스트박스 텍스트를 줄바꿈으로 연결해서 반환.
+
+        Claude가 "이 슬라이드에 어떤 내용이 있지?"를 자연어로 답하거나
+        특정 텍스트를 정확한 형태로 찾기 위해 사용.
+        """
+        if slide_index < 1 or slide_index > self.slide_count:
+            raise ValueError(
+                f"slide_index out of range: {slide_index} (slide_count={self.slide_count})"
+            )
+        slide = self._prs.Slides(slide_index)
+        parts: list[str] = []
+        for shape in slide.Shapes:
+            try:
+                if shape.HasTextFrame != MSO_TRUE:
+                    continue
+                text = (shape.TextFrame.TextRange.Text or "").strip()
+                if text:
+                    parts.append(text)
+            except Exception:
+                continue
+        return "\n".join(parts)
 
     # ---------- 표준 레이아웃 편의 메서드 ----------
     # 각 메서드는 pptmaker.slides 모듈의 함수를 래핑한다.

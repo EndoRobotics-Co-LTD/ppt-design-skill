@@ -246,6 +246,43 @@ Claude: (그 파일을 PowerPoint로 열고 끝에 슬라이드 append)
 
 ---
 
+## 🔧 PPT 수정 / 추가 (이미 만든 .pptx 작업)
+
+이미 만든 .pptx 를 수정하고 싶을 때의 대화 예시:
+
+```
+사용자: "어제 만든 ~/Desktop/2026Q1.pptx 의 KPI 카드 +18% → +22% 로 바꿔줘"
+Claude: session = LiveSession.open_existing("~/Desktop/2026Q1.pptx")
+        session.replace_text_in_slide(5, "+18%", "+22%")
+        "5번 슬라이드의 +18%를 +22%로 변경했습니다."
+```
+
+### 흔한 후속 요청 패턴
+
+| 사용자 요청 | Claude 동작 |
+|---|---|
+| "한 장 더 추가해줘" | `session.add_xxx(...)` — closing 직전에 삽입 |
+| "이 텍스트 바꿔줘" | `session.replace_text_in_slide(idx, find, replace)` |
+| "전체에서 'Q1' → 'Q2' 바꿔줘" | `session.replace_text_global("Q1", "Q2")` |
+| "7번 슬라이드 지워줘" | `session.delete_slide(7)` |
+| "5번을 3번 위치로 옮겨줘" | `session.move_slide(5, 3)` |
+| "이 슬라이드에 뭐가 있는지 알려줘" | `session.get_slide_text(idx)` 로 확인 후 사용자에게 보고 |
+
+### ⚠️ 핵심 원칙: 수정 ≠ 재생성
+
+- **이미 만든 PPT는 절대 `LiveSession.new()` 로 덮어쓰지 않습니다.**
+- 사용자가 PowerPoint에서 직접 편집한 내용도 그대로 보존됩니다.
+- "처음부터 다시 만들어줘" 같이 명시적 재빌드 요청이 있을 때만 `new(force_overwrite=True)`.
+- 안전 가드: 같은 경로에 .pptx가 이미 있거나 PowerPoint에서 열려있으면 `new()` 호출 시 에러 발생 — silent overwrite 절대 안 일어남.
+
+### 콘텐츠 SSOT는 .pptx 파일 자체
+
+- `.py` 스크립트에 "전체 콘텐츠 정의"를 보관하지 **않습니다**. `.pptx`가 정답지.
+- Claude는 수정 요청 시 임시 작업 스크립트를 만들어 실행하고 끝나면 정리 — 작업 폴더에 `.py` 누적 없음.
+- 수정 이력은 `.pptx` 파일 자체에서 관리 (PowerPoint 변경 추적, 또는 파일을 git/Dropbox에 두기).
+
+---
+
 ## 🧩 사용자 커스텀 레이아웃 (각 PC 단위 fork)
 
 사내 표준 14종 외에 자기가 자주 쓰는 레이아웃을 직접 추가할 수 있어요. 추가분은 **본인 PC에만** 저장되고 (git pull 안전), 그 사람의 Claude는 새 레이아웃을 자동 인식해서 활용합니다.
