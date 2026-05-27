@@ -24,12 +24,13 @@ def add_to_live(
     *,
     chart_type: str = "column",
     note: str | None = None,
+    section_no: int | None = None,
     page: int | None = None,
 ):
     if not categories or not series:
         raise ValueError("categories와 series가 모두 필요합니다.")
 
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
     chart_kind = CHART_TYPES.get(chart_type, XL_COLUMN_CLUSTERED)
 
     chart_w = C.SLIDE_W - 2 * C.Layout.MARGIN_X

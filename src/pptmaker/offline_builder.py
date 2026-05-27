@@ -10,18 +10,38 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.util import Pt
 
+from pptmaker import themes
 from pptmaker.design_tokens import TOKENS
 
-REFERENCE_DIR = Path(__file__).resolve().parents[2] / "Reference"
-DEFAULT_TEMPLATE = REFERENCE_DIR / "EndoRobotics_PPT Design 01_2026.02.pptx"
+LAYOUTS_DIR = themes.LAYOUTS_DIR
+DEFAULT_TEMPLATE = themes.template_path(themes.DEFAULT_THEME)
 
 
 class OfflineBuilder:
-    def __init__(self, template_path: Path | str | None = None):
-        self._path = Path(template_path) if template_path else DEFAULT_TEMPLATE
+    """python-pptx 기반 오프라인 PPT 빌더.
+
+    Args:
+        theme: 'theme1' | 'theme2'. None이면 DEFAULT_THEME 사용.
+        template_path: theme보다 우선. 임의 경로로 템플릿 강제 지정 (고급).
+    """
+
+    def __init__(
+        self,
+        theme: str | None = None,
+        template_path: Path | str | None = None,
+    ):
+        if template_path is not None:
+            self._path = Path(template_path)
+        else:
+            self._path = themes.template_path(theme)
         if not self._path.exists():
             raise FileNotFoundError(f"Template not found: {self._path}")
+        self._theme = theme or themes.DEFAULT_THEME
         self._prs = Presentation(str(self._path))
+
+    @property
+    def theme(self) -> str:
+        return self._theme
 
     @property
     def slide_count(self) -> int:

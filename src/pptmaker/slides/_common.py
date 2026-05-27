@@ -189,9 +189,17 @@ def add_chrome_slide(session, title: str | None = None):
     이 레이아웃에 회사 표준 chrome(헤더 바, 로고, 하단 구분선, 보안 표시,
     우측 하단 엠블럼)이 통째로 들어있어 모든 슬라이드에 자동 적용된다.
 
+    session.blank_mode가 True면 본문 슬라이드를 closing 직전에 삽입
+    (closing 템플릿을 마지막 자리에 보존). 아니면 끝에 append.
+
     Returns: (slide, idx) — slide는 COM 객체, idx는 1-based 슬라이드 번호.
     """
-    idx = session.slide_count + 1
+    # blank 모드면 closing(마지막) 직전에 삽입 — closing이 항상 마지막에 남도록
+    if getattr(session, "blank_mode", False) and session.slide_count >= 1:
+        idx = session.slide_count  # 마지막 자리 (closing 위치) — 삽입 후 closing은 idx+1로 밀림
+    else:
+        idx = session.slide_count + 1
+
     layout = session._find_custom_layout("제목만", "Title Only")
     if layout is not None:
         slide = session._prs.Slides.AddSlide(idx, layout)
@@ -199,8 +207,8 @@ def add_chrome_slide(session, title: str | None = None):
         # Reference에 '제목만'이 없는 경우 fallback (사실상 일어나면 안 됨)
         slide = session._prs.Slides.Add(idx, PP_LAYOUT_TITLE_ONLY)
 
-    # 타이틀 placeholder 채우기 — 폰트는 맑은 고딕 강제 + Bold 강제.
-    # 크기·색상은 마스터 placeholder 기본 스타일을 따른다 (Reference 보존).
+    # 타이틀 placeholder 채우기 — 두 테마 모두 흰색 Bold 강제.
+    # theme1: 네이비 헤더 바 위 흰색. theme2: 사진 띠 위 흰색.
     if title is not None and slide.Shapes.HasTitle == MSO_TRUE:
         try:
             tr = slide.Shapes.Title.TextFrame.TextRange
@@ -208,10 +216,24 @@ def add_chrome_slide(session, title: str | None = None):
             tr.Font.Name = FONT_MAJOR
             tr.Font.NameFarEast = FONT_MAJOR
             tr.Font.Bold = MSO_TRUE
+            tr.Font.Color.RGB = Role.TEXT_INVERSE  # 흰색 강제
         except Exception:
             pass
 
     return slide, idx
+
+
+def title_with_section_no(idx: int | str | None, text: str) -> str:
+    """본문 슬라이드 타이틀에 섹션 넘버 prefix 부여 ("04. 핵심 성과 요약").
+
+    Reference Theme 표준: 본문 슬라이드 타이틀은 "NN. " prefix 가짐.
+    idx=None이면 prefix 없이 그대로 반환.
+    """
+    if idx is None:
+        return text
+    if isinstance(idx, int):
+        return f"{idx:02d}. {text}"
+    return f"{idx}. {text}"
 
 
 # ── 기본 도형 추가 ──────────────────────────────────────────────────
@@ -351,3 +373,118 @@ def iterate_bullets(text_range, lines: Iterable[str], *, size: int = 16, color: 
     text_range.Font.NameFarEast = FONT_MINOR
     text_range.Font.Size = size
     text_range.Font.Color.RGB = color
+
+
+# ──────────────────────────────────────────────────────────────────────
+# 새 시각 패턴 helpers (Reference 4페이지 디자인 표준)
+# ──────────────────────────────────────────────────────────────────────
+
+@dataclass
+class TileCard:
+    """타일 카드: 큰 faded 번호 + Bold 제목 + 보조 설명 + 좌측 컬러 보더."""
+    number: int | str
+    title: str
+    desc: str | None = None
+    accent: int = C.ACCENT1  # 좌측 보더 컬러
+    faded_num_color: int | None = None  # None이면 accent 기반 자동
+
+
+def _lighten(rgb_long: int, alpha: float = 0.65) -> int:
+    """MSO RGB long을 흰색 방향으로 alpha 만큼 lighten."""
+    r = rgb_long & 0xFF
+    g = (rgb_long >> 8) & 0xFF
+    b = (rgb_long >> 16) & 0xFF
+    nr = int(r + (255 - r) * alpha)
+    ng = int(g + (255 - g) * alpha)
+    nb = int(b + (255 - b) * alpha)
+    return nr + (ng << 8) + (nb << 16)
+
+
+def draw_tile_card(slide, left: float, top: float, width: float, height: float,
+                   card: TileCard):
+    """Reference 4페이지 표준 타일 카드.
+
+    구조: 좌측 컬러 보더 (4pt) + 회색 카드 배경 + 큰 faded 번호 + Bold 제목 + 본문 설명.
+    """
+    pad = Layout.CARD_INNER_PAD
+    border_w = 4.0  # 좌측 보더 두께 (pt)
+
+    # 카드 배경
+    add_rect(slide, left, top, width, height,
+             fill=Role.BG_SUBTLE, shape_type=MSO_SHAPE_ROUNDED_RECTANGLE)
+    # 좌측 컬러 보더 (둥근 사각형 위에 얇은 사각형으로 덮음)
+    add_rect(slide, left, top, border_w, height, fill=card.accent)
+
+    # 큰 faded 번호 (배경처럼 — 텍스트 hierarchy의 보조 요소)
+    num_color = card.faded_num_color if card.faded_num_color is not None else _lighten(card.accent, 0.7)
+    num_str = f"{card.number:02d}" if isinstance(card.number, int) else str(card.number)
+    add_textbox(slide,
+                left + border_w + Space.SM, top + pad,
+                52, height - 2 * pad,
+                text=num_str, font=FONT_MAJOR, size=Type.H1, bold=True,
+                color=num_color, align=PP_ALIGN_LEFT)
+
+    # 제목 (H3 Bold)
+    text_x = left + border_w + 60
+    text_w = width - (text_x - left) - pad
+    add_textbox(slide,
+                text_x, top + pad + 2,
+                text_w, 24,
+                text=card.title, font=FONT_MAJOR, size=Type.H3, bold=True,
+                color=Role.TEXT_PRIMARY, align=PP_ALIGN_LEFT)
+    # 설명 (CAPTION)
+    if card.desc:
+        add_textbox(slide,
+                    text_x, top + pad + 28,
+                    text_w, height - pad - 30,
+                    text=card.desc, font=FONT_MINOR, size=Type.CAPTION,
+                    color=Role.TEXT_SECONDARY, align=PP_ALIGN_LEFT)
+
+
+def draw_column_eyebrow(slide, left: float, top: float, width: float,
+                        header_text: str, *, accent: int = Role.BRAND_PRIMARY):
+    """원형 아이콘 + Bold 헤더 + 굵은 underline (Reference 4페이지 컬럼 eyebrow).
+
+    accent 컬러로 통일 — 좌/우 컬럼 구분 시 다른 accent 전달.
+    Returns: underline 아래 y 좌표 (다음 컨텐츠 시작점).
+    """
+    d_circle = 26.0  # 원 직경
+    # 원형 아이콘
+    add_rect(slide, left, top, d_circle, d_circle,
+             fill=accent, shape_type=MSO_SHAPE_OVAL)
+    # Bold 헤더 텍스트
+    add_textbox(slide,
+                left + d_circle + Space.SM, top + 2,
+                width - d_circle - Space.SM, d_circle - 2,
+                text=header_text, font=FONT_MAJOR, size=Type.H2, bold=True,
+                color=accent, align=PP_ALIGN_LEFT)
+    # 굵은 가로 underline
+    underline_y = top + d_circle + Space.XS
+    add_rect(slide, left, underline_y, width, 2.5,
+             fill=accent)
+    return underline_y + Space.LG  # 다음 컨텐츠 시작 y
+
+
+def draw_toc_item(slide, left: float, top: float, width: float,
+                  number: int, text: str, *,
+                  number_color: int = Role.BRAND_PRIMARY,
+                  text_color: int = Role.TEXT_PRIMARY,
+                  row_height: float = 56.0):
+    """Reference 2단 목차 항목: 번호 + 텍스트 + 아래 가로 구분선.
+
+    구조: "01" Bold 컬러 + 텍스트 + 아래 얇은 가로선.
+    """
+    num_w = 36.0
+    # 번호
+    add_textbox(slide, left, top, num_w, row_height - 12,
+                text=f"{number:02d}", font=FONT_MAJOR, size=Type.H2, bold=True,
+                color=number_color, align=PP_ALIGN_LEFT)
+    # 텍스트
+    add_textbox(slide, left + num_w + Space.MD, top,
+                width - num_w - Space.MD, row_height - 12,
+                text=text, font=FONT_MAJOR, size=Type.H3, bold=False,
+                color=text_color, align=PP_ALIGN_LEFT)
+    # 아래 구분선 (얇은 회색)
+    line_y = top + row_height - 6
+    add_rect(slide, left, line_y, width, 0.8,
+             fill=Role.BG_DIVIDER)

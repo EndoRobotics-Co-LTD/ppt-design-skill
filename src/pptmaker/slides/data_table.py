@@ -9,12 +9,13 @@ def add_to_live(
     title: str,
     rows: list[list[str]],
     *,
+    section_no: int | None = None,
     page: int | None = None,
 ):
     if not rows or not rows[0]:
         raise ValueError("표 데이터가 비어있습니다.")
 
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
 
     n_rows = len(rows)
     n_cols = max(len(r) for r in rows)

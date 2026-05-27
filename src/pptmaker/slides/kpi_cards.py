@@ -9,12 +9,13 @@ def add_to_live(
     title: str,
     cards: list[dict],
     *,
+    section_no: int | None = None,
     page: int | None = None,
 ):
     if not (2 <= len(cards) <= 4):
         raise ValueError("KPI 카드는 2~4개여야 합니다.")
 
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
 
     gutter = C.Layout.CARD_GUTTER
     n = len(cards)

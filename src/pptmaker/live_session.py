@@ -42,11 +42,16 @@ class SlideRef:
 
 
 class LiveSession:
-    """실행 중 PowerPoint Presentation에 대한 컨텍스트."""
+    """실행 중 PowerPoint Presentation에 대한 컨텍스트.
 
-    def __init__(self, app, presentation):
+    blank_mode: True면 데모 슬라이드(2 ~ N-1)가 제거되고 cover/closing 템플릿만 남는다.
+                이 모드에서는 add_chrome_slide가 closing 직전에 본문을 삽입.
+    """
+
+    def __init__(self, app, presentation, *, blank_mode: bool = False):
         self._app = app
         self._prs = presentation
+        self.blank_mode = blank_mode
 
     # ---------- 진입/연결 ----------
 
@@ -60,18 +65,57 @@ class LiveSession:
         return app
 
     @classmethod
-    def open(cls, template_path: Path | str) -> "LiveSession":
-        """템플릿을 열거나, 이미 열려있다면 그것에 연결한다."""
+    def open(
+        cls,
+        template_path: Path | str | None = None,
+        theme: str | None = None,
+        *,
+        from_blank: bool = False,
+    ) -> "LiveSession":
+        """템플릿을 열거나, 이미 열려있다면 그것에 연결한다.
+
+        Args:
+            template_path: 임의 경로로 템플릿 강제 지정 (고급).
+            theme: 'theme1' | 'theme2'. template_path가 None일 때만 사용. 둘 다 None이면 DEFAULT_THEME.
+            from_blank: True면 데모 본문 슬라이드를 제거하고 cover/closing 템플릿만 남긴다.
+                       Production 빌드에 권장 (데모 컨텐츠가 출력에 따라가지 않음).
+        """
+        from pptmaker import themes
+
+        if template_path is None:
+            template_path = themes.template_path(theme)
         app = cls.connect_or_start()
         target = str(Path(template_path).resolve())
+        session = None
         for prs in app.Presentations:
             try:
                 if str(Path(prs.FullName).resolve()).lower() == target.lower():
-                    return cls(app, prs)
+                    session = cls(app, prs, blank_mode=from_blank)
+                    break
             except Exception:
                 continue
-        prs = app.Presentations.Open(target, ReadOnly=MSO_FALSE, WithWindow=MSO_TRUE)
-        return cls(app, prs)
+        if session is None:
+            prs = app.Presentations.Open(target, ReadOnly=MSO_FALSE, WithWindow=MSO_TRUE)
+            session = cls(app, prs, blank_mode=from_blank)
+        if from_blank:
+            session.clean_to_chrome()
+        return session
+
+    def clean_to_chrome(self) -> None:
+        """데모 본문 슬라이드(2 ~ N-1) 제거. cover(1) + closing(마지막)만 보존.
+
+        이후 add_chrome_slide는 closing 직전에 본문을 삽입하므로 순서가 자동 유지됨.
+        """
+        n = self.slide_count
+        if n < 3:
+            return  # 본문이 없음 — 정리 불필요
+        # 역순 삭제로 인덱스 안정성 유지
+        for idx in range(n - 1, 1, -1):
+            try:
+                self._prs.Slides(idx).Delete()
+            except Exception:
+                pass
+        self.blank_mode = True
 
     def __enter__(self) -> "LiveSession":
         return self
@@ -182,53 +226,86 @@ class LiveSession:
         from pptmaker.slides import section_divider
         return section_divider.add_to_live(self, title, number=number, subtitle=subtitle, page=page)
 
-    def add_single_column(self, title: str, bullets: list, *,
-                          eyebrow: str | None = None, page: int | None = None) -> int:
+    def add_single_column(self, title: str, bullets: list | None = None, *,
+                          tiles: list | None = None,
+                          eyebrow: str | None = None,
+                          subtitle: str | None = None,
+                          section_no: int | None = None,
+                          page: int | None = None) -> int:
+        """1단 본문 슬라이드. tiles 지정 시 Reference 표준 타일 카드, 아니면 불릿 리스트."""
         from pptmaker.slides import single_column
-        return single_column.add_to_live(self, title, bullets, eyebrow=eyebrow, page=page)
+        return single_column.add_to_live(self, title, bullets, tiles=tiles,
+                                         eyebrow=eyebrow, subtitle=subtitle,
+                                         section_no=section_no, page=page)
 
-    def add_two_column(self, title: str, left_sub: str, left_bullets: list[str],
-                       right_sub: str, right_bullets: list[str], *, page: int | None = None) -> int:
+    def add_two_column(self, title: str, left_sub: str, left_items: list,
+                       right_sub: str, right_items: list, *,
+                       use_tiles: bool = True,
+                       section_no: int | None = None,
+                       page: int | None = None) -> int:
+        """2단 본문 슬라이드. use_tiles=True (기본) = Reference 원형 아이콘 + 타일 카드."""
         from pptmaker.slides import two_column
-        return two_column.add_to_live(self, title, left_sub, left_bullets,
-                                       right_sub, right_bullets, page=page)
+        return two_column.add_to_live(self, title, left_sub, left_items,
+                                       right_sub, right_items,
+                                       use_tiles=use_tiles, section_no=section_no, page=page)
 
     def add_highlight_quote(self, message: str, *, attribution: str | None = None,
+                            section_no: int | None = None,
                             page: int | None = None) -> int:
         from pptmaker.slides import highlight_quote
-        return highlight_quote.add_to_live(self, message, attribution=attribution, page=page)
+        return highlight_quote.add_to_live(self, message, attribution=attribution,
+                                            section_no=section_no, page=page)
 
-    def add_kpi_cards(self, title: str, cards: list[dict], *, page: int | None = None) -> int:
+    def add_kpi_cards(self, title: str, cards: list[dict], *,
+                      section_no: int | None = None,
+                      page: int | None = None) -> int:
         from pptmaker.slides import kpi_cards
-        return kpi_cards.add_to_live(self, title, cards, page=page)
+        return kpi_cards.add_to_live(self, title, cards, section_no=section_no, page=page)
 
-    def add_data_table(self, title: str, rows: list[list[str]], *, page: int | None = None) -> int:
+    def add_data_table(self, title: str, rows: list[list[str]], *,
+                       section_no: int | None = None,
+                       page: int | None = None) -> int:
         from pptmaker.slides import data_table
-        return data_table.add_to_live(self, title, rows, page=page)
+        return data_table.add_to_live(self, title, rows, section_no=section_no, page=page)
 
     def add_chart(self, title: str, categories: list[str], series: list[dict], *,
-                  chart_type: str = "column", note: str | None = None, page: int | None = None) -> int:
+                  chart_type: str = "column", note: str | None = None,
+                  section_no: int | None = None,
+                  page: int | None = None) -> int:
         from pptmaker.slides import chart
         return chart.add_to_live(self, title, categories, series,
-                                  chart_type=chart_type, note=note, page=page)
+                                  chart_type=chart_type, note=note,
+                                  section_no=section_no, page=page)
 
     def add_comparison(self, title: str, left: dict, right: dict, *,
-                       arrow_label: str | None = None, page: int | None = None) -> int:
+                       arrow_label: str | None = None,
+                       section_no: int | None = None,
+                       page: int | None = None) -> int:
         from pptmaker.slides import comparison
         return comparison.add_to_live(self, title, left, right,
-                                       arrow_label=arrow_label, page=page)
+                                       arrow_label=arrow_label,
+                                       section_no=section_no, page=page)
 
     def add_text_image(self, title: str, image_path, subtitle: str, bullets: list[str], *,
-                       image_side: str = "left", page: int | None = None) -> int:
+                       image_side: str = "left",
+                       section_no: int | None = None,
+                       page: int | None = None) -> int:
         from pptmaker.slides import text_image
         return text_image.add_to_live(self, title, image_path, subtitle, bullets,
-                                       image_side=image_side, page=page)
+                                       image_side=image_side,
+                                       section_no=section_no, page=page)
 
     def add_full_image(self, image_path, *, caption: str | None = None,
-                       title: str | None = None, page: int | None = None) -> int:
+                       title: str = "이미지",
+                       section_no: int | None = None,
+                       page: int | None = None) -> int:
         from pptmaker.slides import full_image
-        return full_image.add_to_live(self, image_path, caption=caption, title=title, page=page)
+        return full_image.add_to_live(self, image_path, caption=caption, title=title,
+                                       section_no=section_no, page=page)
 
-    def add_process_flow(self, title: str, steps: list[dict], *, page: int | None = None) -> int:
+    def add_process_flow(self, title: str, steps: list[dict], *,
+                         section_no: int | None = None,
+                         page: int | None = None) -> int:
         from pptmaker.slides import process_flow
-        return process_flow.add_to_live(self, title, steps, page=page)
+        return process_flow.add_to_live(self, title, steps,
+                                         section_no=section_no, page=page)

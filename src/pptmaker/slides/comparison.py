@@ -11,9 +11,10 @@ def add_to_live(
     right: dict,
     *,
     arrow_label: str | None = None,
+    section_no: int | None = None,
     page: int | None = None,
 ):
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
 
     gutter = 80.0  # 가운데 화살표 영역 (특수)
     side_w = (C.SLIDE_W - 2 * C.Layout.MARGIN_X - gutter) / 2

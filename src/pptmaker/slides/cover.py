@@ -90,20 +90,34 @@ def add_to_live(
     if session.slide_count < 1:
         raise ValueError("Reference 표지(1번 슬라이드)가 없는 프레젠테이션에서는 표지를 만들 수 없습니다.")
 
-    # 1번 슬라이드 복제 → 바로 뒤에 새 슬라이드 생성
-    source = session._prs.Slides(1)
-    dup_range = source.Duplicate()
-
-    # 복제본을 맨 끝으로 이동
-    target_idx = session.slide_count  # Duplicate 후 카운트가 1 증가한 상태
-    try:
-        dup_range.MoveTo(target_idx)
-    except Exception:
-        # MoveTo 실패 시 2번 자리에 그대로 두기 (덜 이상적이지만 동작은 함)
-        pass
-
-    # 새 슬라이드 핸들 다시 확보
-    new_slide = session._prs.Slides(target_idx)
+    if getattr(session, "blank_mode", False):
+        # blank 모드: 슬라이드 1을 in-place modify (duplicate 없음)
+        new_slide = session._prs.Slides(1)
+        target_idx = 1
+        # 기존 slide-level 텍스트 박스들 정리 — 새 텍스트 그리기 전 충돌 방지.
+        # PICTURE 등 비-텍스트 shape는 보존 (배경 이미지/로고 chrome 유지).
+        to_clear = []
+        for shape in new_slide.Shapes:
+            try:
+                if shape.HasTextFrame == C.MSO_TRUE and shape.Type == 17:  # TEXT_BOX
+                    to_clear.append(shape)
+            except Exception:
+                continue
+        for shape in to_clear:
+            try:
+                shape.TextFrame.TextRange.Text = ""
+            except Exception:
+                pass
+    else:
+        # 기존: 슬라이드 1 복제 → 끝으로 이동
+        source = session._prs.Slides(1)
+        dup_range = source.Duplicate()
+        target_idx = session.slide_count
+        try:
+            dup_range.MoveTo(target_idx)
+        except Exception:
+            pass
+        new_slide = session._prs.Slides(target_idx)
 
     # 부제목 텍스트 구성
     if subtitle is None:

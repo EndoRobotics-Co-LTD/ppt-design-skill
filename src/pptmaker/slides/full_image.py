@@ -12,9 +12,10 @@ def add_to_live(
     *,
     caption: str | None = None,
     title: str = "이미지",
+    section_no: int | None = None,
     page: int | None = None,
 ):
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
 
     img_left = 0
     img_top = C.BODY_TOP

@@ -13,11 +13,8 @@ venv/
 ~$*.ppt
 ~$*.docx
 
-# Reference의 추출된 임시 미디어 (재추출 가능)
-Reference/_extracted_media/
-
-# 사내 발표 자료 (디자인 템플릿이 아닌 실제 컨텐츠 — 배포 제외)
-Reference/Reference Data/
+# Reference: 사내 실제 발표 자료 (외부 배포 금지, 전사 git 배포에서 제외)
+Reference/
 
 # OS
 Thumbs.db
@@ -31,7 +28,11 @@ desktop.ini
 
 # Claude Code local
 .claude/settings.local.json
+CLAUDE.md
 
 # Generated output
 output/
 *.pptx.bak
+
+# Local 작업 폴더 (디버그 PNG, 임시 스크립트, 백업 등 — 배포 불필요)
+.compare/

@@ -97,19 +97,35 @@ def add_to_live(
         presenter, organization, date: 발표자 정보 (한 줄 부제목으로 합쳐 표시)
         subtitle: presenter 묶음 대신 직접 지정할 부제목
     """
-    template = _find_closing_template(session)
-    if template is None:
-        raise ValueError("마무리 슬라이드 템플릿을 찾을 수 없습니다 (슬라이드 없음).")
-
-    # 복제 → 끝으로 이동
-    dup_range = template.Duplicate()
-    target_idx = session.slide_count
-    try:
-        dup_range.MoveTo(target_idx)
-    except Exception:
-        pass
-
-    new_slide = session._prs.Slides(target_idx)
+    if getattr(session, "blank_mode", False) and session.slide_count >= 2:
+        # blank 모드: 마지막 슬라이드(closing 템플릿)를 in-place modify
+        target_idx = session.slide_count
+        new_slide = session._prs.Slides(target_idx)
+        # 기존 텍스트 박스 정리 — 새 메시지 그리기 전 충돌 방지
+        to_clear = []
+        for shape in new_slide.Shapes:
+            try:
+                if shape.HasTextFrame == C.MSO_TRUE and shape.Type == 17:
+                    to_clear.append(shape)
+            except Exception:
+                continue
+        for shape in to_clear:
+            try:
+                shape.TextFrame.TextRange.Text = ""
+            except Exception:
+                pass
+    else:
+        # 기존: 마무리 후보 찾아 복제 → 끝으로 이동
+        template = _find_closing_template(session)
+        if template is None:
+            raise ValueError("마무리 슬라이드 템플릿을 찾을 수 없습니다 (슬라이드 없음).")
+        dup_range = template.Duplicate()
+        target_idx = session.slide_count
+        try:
+            dup_range.MoveTo(target_idx)
+        except Exception:
+            pass
+        new_slide = session._prs.Slides(target_idx)
 
     # 부제목 텍스트 구성
     if subtitle is None:

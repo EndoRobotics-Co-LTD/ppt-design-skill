@@ -9,12 +9,13 @@ def add_to_live(
     title: str,
     steps: list[dict],
     *,
+    section_no: int | None = None,
     page: int | None = None,
 ):
     if not (2 <= len(steps) <= 6):
         raise ValueError("프로세스 단계는 2~6개여야 합니다.")
 
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
 
     n = len(steps)
     pad = C.Layout.CARD_INNER_PAD

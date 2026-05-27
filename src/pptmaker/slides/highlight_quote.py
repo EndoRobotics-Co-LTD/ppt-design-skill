@@ -10,9 +10,10 @@ def add_to_live(
     *,
     title: str = "핵심 메시지",
     attribution: str | None = None,
+    section_no: int | None = None,
     page: int | None = None,
 ):
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
 
     center_y = (C.BODY_TOP + C.BODY_BOTTOM) / 2
 

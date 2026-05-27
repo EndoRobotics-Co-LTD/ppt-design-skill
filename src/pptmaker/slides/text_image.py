@@ -14,9 +14,10 @@ def add_to_live(
     bullets: list[str],
     *,
     image_side: str = "left",
+    section_no: int | None = None,
     page: int | None = None,
 ):
-    slide, idx = C.add_chrome_slide(session, title=title)
+    slide, idx = C.add_chrome_slide(session, title=C.title_with_section_no(section_no, title))
 
     gutter = C.Space.XXXL - 8.0  # 40
     side_w = (C.SLIDE_W - 2 * C.Layout.MARGIN_X - gutter) / 2

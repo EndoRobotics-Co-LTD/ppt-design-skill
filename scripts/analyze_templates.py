@@ -1,4 +1,7 @@
-"""Reference .pptx 두 개를 분석해 design_tokens.json을 생성한다.
+"""layouts/ 의 theme*.pptx 를 분석해 design_tokens.json을 생성한다.
+
+분석 대상은 `layouts/` 폴더의 작업본 (`theme1.pptx`, `theme2.pptx`).
+`Reference/`의 원본 스냅샷이 아니라, 실제 사용/커스텀 중인 layouts를 분석한다.
 
 추출 대상:
 - 슬라이드 크기/비율
@@ -20,7 +23,7 @@ from pptx import Presentation
 from pptx.util import Emu
 
 ROOT = Path(__file__).resolve().parent.parent
-REFERENCE_DIR = ROOT / "Reference"
+LAYOUTS_DIR = ROOT / "layouts"
 OUTPUT = ROOT / "design_tokens.json"
 
 NS = {
@@ -165,9 +168,9 @@ def analyze(pptx_path: Path) -> dict:
 
 
 def main() -> None:
-    files = sorted(REFERENCE_DIR.glob("*.pptx"))
+    files = sorted(LAYOUTS_DIR.glob("theme*.pptx"))
     if not files:
-        raise SystemExit(f"No .pptx files found in {REFERENCE_DIR}")
+        raise SystemExit(f"No theme*.pptx files found in {LAYOUTS_DIR}")
     report = {"templates": [analyze(p) for p in files]}
     OUTPUT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"OK -> {OUTPUT} ({OUTPUT.stat().st_size} bytes)")

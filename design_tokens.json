@@ -1,13 +1,13 @@
 {
   "templates": [
     {
-      "file": "EndoRobotics_PPT Design 01_2026.02.pptx",
+      "file": "theme1.pptx",
       "slide_size": {
         "width_cm": 33.87,
         "height_cm": 19.05,
         "aspect": 1.7778
       },
-      "slide_count": 5,
+      "slide_count": 10,
       "layout_count": 11,
       "theme_colors": {
         "dk1": "sys:000000",
@@ -36,17 +36,69 @@
       "runtime_fonts": {
         "families": [
           [
-            "Helvetica",
-            1
+            "맑은 고딕",
+            118
           ]
         ],
         "sizes_pt": [
           [
-            60.0,
+            11.0,
+            36
+          ],
+          [
+            16.0,
+            24
+          ],
+          [
+            40.0,
+            6
+          ],
+          [
+            32.0,
+            6
+          ],
+          [
+            15.0,
+            6
+          ],
+          [
+            20.0,
+            5
+          ],
+          [
+            22.0,
+            5
+          ],
+          [
+            36.0,
+            4
+          ],
+          [
+            12.0,
+            4
+          ],
+          [
+            28.0,
+            4
+          ],
+          [
+            14.0,
+            4
+          ],
+          [
+            56.0,
+            2
+          ],
+          [
+            18.0,
+            2
+          ],
+          [
+            72.0,
             1
           ],
           [
-            66.0,
+            100.0,
             1
           ]
         ]
@@ -389,38 +441,126 @@
           "layout": "제목 슬라이드",
           "shape_counts": {
             "PICTURE (13)": 1,
-            "TEXT_BOX (17)": 1
+            "TEXT_BOX (17)": 2
           },
           "text_preview": [
-            "Title:"
+            "Title",
+            "Who · Team | 2026.05.26"
           ]
         },
         {
           "index": 2,
           "layout": "제목만",
           "shape_counts": {
-            "PLACEHOLDER (14)": 1
+            "PLACEHOLDER (14)": 1,
+            "TEXT_BOX (17)": 10,
+            "AUTO_SHAPE (1)": 5
           },
-          "text_preview": []
+          "text_preview": [
+            "목차",
+            "01",
+            "회사 소개"
+          ]
         },
         {
           "index": 3,
           "layout": "제목만",
           "shape_counts": {
-            "PLACEHOLDER (14)": 1
+            "PLACEHOLDER (14)": 1,
+            "TEXT_BOX (17)": 3,
+            "LINE (9)": 1
           },
-          "text_preview": []
+          "text_preview": [
+            "구역 구분",
+            "01",
+            "1분기 실적"
+          ]
         },
         {
           "index": 4,
           "layout": "제목만",
           "shape_counts": {
-            "PLACEHOLDER (14)": 1
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 8,
+            "TEXT_BOX (17)": 12
           },
-          "text_preview": []
+          "text_preview": [
+            "04. 핵심 성과 요약",
+            "01",
+            "매출 +18% YoY"
+          ]
         },
         {
           "index": 5,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 16,
+            "TEXT_BOX (17)": 14
+          },
+          "text_preview": [
+            "05. 시장 환경 변화",
+            "기회 요인",
+            "01"
+          ]
+        },
+        {
+          "index": 6,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 6,
+            "TEXT_BOX (17)": 9
+          },
+          "text_preview": [
+            "06. 핵심 지표",
+            "매출 (YoY)",
+            "+18%"
+          ]
+        },
+        {
+          "index": 7,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 5,
+            "TEXT_BOX (17)": 7
+          },
+          "text_preview": [
+            "07. 프로세스 개선 효과",
+            "Before",
+            "수기 보고서 작성"
+          ]
+        },
+        {
+          "index": 8,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "TEXT_BOX (17)": 3
+          },
+          "text_preview": [
+            "08. 핵심 메시지",
+            "“",
+            "2026년, 글로벌 시장 진출 원년"
+          ]
+        },
+        {
+          "index": 9,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 7,
+            "TEXT_BOX (17)": 12
+          },
+          "text_preview": [
+            "09. PPTMaker 도입 로드맵",
+            "01",
+            "디자인 토큰"
+          ]
+        },
+        {
+          "index": 10,
           "layout": "제목 슬라이드",
           "shape_counts": {
             "PICTURE (13)": 1,
@@ -433,13 +573,13 @@
       ]
     },
     {
-      "file": "EndoRobotics_PPT Design 02_2026.02.pptx",
+      "file": "theme2.pptx",
       "slide_size": {
         "width_cm": 33.87,
         "height_cm": 19.05,
         "aspect": 1.7778
       },
-      "slide_count": 4,
+      "slide_count": 10,
       "layout_count": 11,
       "theme_colors": {
         "dk1": "sys:000000",
@@ -468,11 +608,71 @@
       "runtime_fonts": {
         "families": [
           [
+            "맑은 고딕",
+            111
+          ],
+          [
             "Baguet Script",
             1
           ]
         ],
         "sizes_pt": [
+          [
+            11.0,
+            36
+          ],
+          [
+            16.0,
+            24
+          ],
+          [
+            20.0,
+            8
+          ],
+          [
+            40.0,
+            6
+          ],
+          [
+            32.0,
+            6
+          ],
+          [
+            15.0,
+            6
+          ],
+          [
+            22.0,
+            5
+          ],
+          [
+            36.0,
+            4
+          ],
+          [
+            12.0,
+            4
+          ],
+          [
+            28.0,
+            4
+          ],
+          [
+            14.0,
+            4
+          ],
+          [
+            18.0,
+            2
+          ],
+          [
+            72.0,
+            1
+          ],
+          [
+            100.0,
+            1
+          ],
           [
             80.0,
             1
@@ -826,20 +1026,115 @@
           "index": 2,
           "layout": "제목만",
           "shape_counts": {
-            "PLACEHOLDER (14)": 1
+            "PLACEHOLDER (14)": 1,
+            "TEXT_BOX (17)": 10,
+            "AUTO_SHAPE (1)": 5
           },
-          "text_preview": []
+          "text_preview": [
+            "목차",
+            "01",
+            "회사 소개"
+          ]
         },
         {
           "index": 3,
           "layout": "제목만",
           "shape_counts": {
-            "PLACEHOLDER (14)": 1
+            "PLACEHOLDER (14)": 1,
+            "TEXT_BOX (17)": 3,
+            "LINE (9)": 1
           },
-          "text_preview": []
+          "text_preview": [
+            "구역 구분",
+            "01",
+            "1분기 실적"
+          ]
         },
         {
           "index": 4,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 8,
+            "TEXT_BOX (17)": 12
+          },
+          "text_preview": [
+            "04. 핵심 성과 요약",
+            "01",
+            "매출 +18% YoY"
+          ]
+        },
+        {
+          "index": 5,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 16,
+            "TEXT_BOX (17)": 14
+          },
+          "text_preview": [
+            "05. 시장 환경 변화",
+            "기회 요인",
+            "01"
+          ]
+        },
+        {
+          "index": 6,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 6,
+            "TEXT_BOX (17)": 9
+          },
+          "text_preview": [
+            "06. 핵심 지표",
+            "매출 (YoY)",
+            "+18%"
+          ]
+        },
+        {
+          "index": 7,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 5,
+            "TEXT_BOX (17)": 7
+          },
+          "text_preview": [
+            "07. 프로세스 개선 효과",
+            "Before",
+            "수기 보고서 작성"
+          ]
+        },
+        {
+          "index": 8,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "TEXT_BOX (17)": 3
+          },
+          "text_preview": [
+            "08. 핵심 메시지",
+            "“",
+            "2026년, 글로벌 시장 진출 원년"
+          ]
+        },
+        {
+          "index": 9,
+          "layout": "제목만",
+          "shape_counts": {
+            "PLACEHOLDER (14)": 1,
+            "AUTO_SHAPE (1)": 7,
+            "TEXT_BOX (17)": 12
+          },
+          "text_preview": [
+            "09. PPTMaker 도입 로드맵",
+            "01",
+            "디자인 토큰"
+          ]
+        },
+        {
+          "index": 10,
           "layout": "제목 슬라이드",
           "shape_counts": {
             "AUTO_SHAPE (1)": 1,

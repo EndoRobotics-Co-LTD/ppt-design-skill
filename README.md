@@ -105,7 +105,7 @@ Claude Code를 재시작하면 변경사항이 자동 반영됩니다.
 
 회사 표준 디자인이 변경되었거나 새 레이아웃을 추가할 때:
 
-1. `Reference/` 폴더에 새 .pptx 표준 템플릿 갱신
+1. `layouts/theme1.pptx` 또는 `layouts/theme2.pptx`를 직접 편집해 디자인 갱신
 2. `python scripts/analyze_templates.py` → `design_tokens.json` 재생성
 3. 변경 사항 git push
 4. 전사 공지 (직원들은 `git pull`로 받음)
