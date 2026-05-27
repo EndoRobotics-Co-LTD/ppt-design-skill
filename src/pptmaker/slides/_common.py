@@ -94,43 +94,72 @@ FONT_MINOR = TOKENS.fonts.minor
 # ──────────────────────────────────────────────────────────────────────
 
 class Type:
-    """타이포그래피 스케일 — 폰트 크기(pt). 이 값들 외에는 사용 금지."""
-    QUOTE_MARK = 100    # highlight_quote의 거대한 따옴표 글리프
-    HERO = 72           # section_divider의 큰 번호
-    COVER_TITLE = 56    # 표지 메인 제목
-    DISPLAY = 40        # section_divider 제목, 매우 큰 강조
-    H1 = 28             # 큰 강조 (KPI value, agenda 번호)
-    H2 = 20             # 소제목 (subtitle, eyebrow 강조)
-    H3 = 16             # 본문 강조 (카드 제목, agenda 항목, comparison 카드 제목)
-    BODY = 14           # 일반 본문 텍스트
-    CAPTION = 11        # 캡션, 표 셀, kpi label/note, chart note
-    MICRO = 9           # eyebrow, footer, 보안 표시
+    """타이포그래피 스케일 (pt 단위). 이 값들 외 사용 금지.
+
+    | 키 | pt | 용도 |
+    |---|---|---|
+    | QUOTE_MARK | 100 | 거대 따옴표 글리프 (highlight_quote) |
+    | HERO | 72 | section_divider 큰 번호 |
+    | COVER_TITLE | 56 | 표지·마무리 메인 제목 |
+    | DISPLAY | 40 | section_divider 제목 등 큰 강조 |
+    | H1 | 28 | KPI value, 큰 강조 |
+    | H2 | 20 | 소제목, 표지 부제목 |
+    | H3 | 16 | 카드 제목, agenda 항목 |
+    | BODY | 14 | 일반 본문 |
+    | CAPTION | 11 | 캡션, 표 셀, note |
+    | MICRO | 9 | eyebrow, footer, 보안 표시 |
+
+    폰트는 맑은 고딕(`FONT_MAJOR`/`FONT_MINOR`)만 사용.
+    """
+    QUOTE_MARK = 100
+    HERO = 72
+    COVER_TITLE = 56
+    DISPLAY = 40
+    H1 = 28
+    H2 = 20
+    H3 = 16
+    BODY = 14
+    CAPTION = 11
+    MICRO = 9
 
 
 class Role:
-    """컬러 역할 — 의미 기반. C.* 직접 참조 금지, 항상 Role을 거친다."""
-    # 텍스트
-    TEXT_PRIMARY = C.TEXT_DARK           # 본문 텍스트
-    TEXT_SECONDARY = C.GRAY_TEXT         # 보조 텍스트, 캡션, eyebrow
-    TEXT_INVERSE = C.TEXT_LIGHT          # 어두운 배경 위 텍스트 (흰색)
-    # 브랜드
-    BRAND_PRIMARY = C.ACCENT1            # 메인 강조 색
-    BRAND_DARK = C.DARK                  # 다크 네이비
-    # 의미적
-    SEMANTIC_NEGATIVE = C.ACCENT5        # before, 부정적 비교 (퍼플)
-    SEMANTIC_POSITIVE = C.ACCENT3        # after, 긍정적 비교 (그린)
-    # 차트/카드용 액센트 (인덱스 0~5)
+    """컬러 역할 (의미 기반). 항상 `Role.*` 경유, `C.*`/HEX 직접 참조 금지.
+
+    | 역할 | HEX | 용도 |
+    |---|---|---|
+    | TEXT_PRIMARY | #000000 | 본문 텍스트 |
+    | TEXT_SECONDARY | #595959 | 보조 텍스트, 캡션, eyebrow |
+    | TEXT_INVERSE | #FFFFFF | 어두운 배경 위 (표지·마무리·헤더 바) |
+    | BRAND_PRIMARY | #156082 | 메인 강조 (accent1, 틸 블루) |
+    | BRAND_DARK | #0E2841 | 다크 네이비 |
+    | SEMANTIC_NEGATIVE | #A02B93 | Before / 부정적 (퍼플) |
+    | SEMANTIC_POSITIVE | #196B24 | After / 긍정적 (그린) |
+    | ACCENT_SERIES | (6색 튜플) | 차트·카드 순환용 |
+    | BG_SUBTLE | #F4F4F4 | 카드 배경, 표 줄무늬 |
+    | BG_DIVIDER | #DDDDDD | 칼럼 구분선 |
+    | BG_CAPTION_OVERLAY | #0E2841 | 풀스크린 이미지 캡션 띠 |
+    """
+    TEXT_PRIMARY = C.TEXT_DARK
+    TEXT_SECONDARY = C.GRAY_TEXT
+    TEXT_INVERSE = C.TEXT_LIGHT
+    BRAND_PRIMARY = C.ACCENT1
+    BRAND_DARK = C.DARK
+    SEMANTIC_NEGATIVE = C.ACCENT5
+    SEMANTIC_POSITIVE = C.ACCENT3
     ACCENT_SERIES = (
         C.ACCENT1, C.ACCENT2, C.ACCENT3, C.ACCENT4, C.ACCENT5, C.ACCENT6,
     )
-    # 배경
-    BG_SUBTLE = hex_to_msorgb("#F4F4F4")     # 카드, 표 줄무늬
-    BG_DIVIDER = hex_to_msorgb("#DDDDDD")    # 구분선
-    BG_CAPTION_OVERLAY = C.DARK              # 풀스크린 이미지 위 캡션 띠
+    BG_SUBTLE = hex_to_msorgb("#F4F4F4")
+    BG_DIVIDER = hex_to_msorgb("#DDDDDD")
+    BG_CAPTION_OVERLAY = C.DARK
 
 
 class Space:
-    """간격 스케일 — pt 단위. 4pt 기반."""
+    """간격 스케일 (4pt 기반, pt 단위). 임의 값 금지.
+
+    XS=4, SM=8, MD=12, LG=16, XL=24, XXL=32, XXXL=48
+    """
     XS = 4
     SM = 8
     MD = 12
@@ -141,7 +170,22 @@ class Space:
 
 
 class Layout:
-    """요소 배치 표준 — 모든 레이아웃이 따라야 할 고정 수치."""
+    """요소 배치 표준 (모든 레이아웃 공통 고정 수치).
+
+    | 키 | pt | 의미 |
+    |---|---|---|
+    | MARGIN_X | 48 | 슬라이드 좌우 마진 |
+    | CARD_H | 220 | KPI 카드 표준 높이 |
+    | CARD_GUTTER | 24 (XL) | 카드 사이 거터 |
+    | CARD_ACCENT_BAR | 4 | 카드 상단 액센트 바 두께 |
+    | CARD_LABEL_BAR_H | 32 | comparison 카드 상단 라벨 바 |
+    | CARD_INNER_PAD | 12 (MD) | 카드 내부 패딩 |
+    | COLUMN_GUTTER | 32 (XXL) | 좌우 칼럼 사이 거터 |
+    | STEP_BOX_H | 120 | 프로세스 단계 박스 높이 |
+    | STEP_ARROW_W | 28 | 프로세스 화살표 폭 |
+    | ACCENT_LINE_LEN | 40 | 소제목 아래 짧은 라인 |
+    | DIVIDER_WEIGHT | 1 | 칼럼 구분선 두께 |
+    """
     # 슬라이드 마진
     MARGIN_X = 48.0                    # 좌우 마진
     # 카드 (KPI, comparison)
