@@ -286,9 +286,44 @@ Claude:  ↓
          → 닫힘 직전에 슬라이드 삽입, {{key}} 자동 치환
 ```
 
-### Phase 2 — 대화형 등록 (향후)
+### Phase 2 — 대화형 등록 (지금 사용 가능)
 
-Claude가 사용자와 대화하며 새 레이아웃을 같이 디자인해서 user_layouts에 자동 등록하는 흐름. 현재는 미구현 — 수동 등록만 가능.
+Claude가 사용자와 대화로 새 레이아웃 시안을 만들고, **한 번의 명령으로 등록**까지 완료합니다.
+
+**대화 예시**:
+
+```
+사용자: "마일스톤 4단계 보여주는 새 레이아웃 추가하고 싶어"
+Claude: "이름은 milestone_4step 어때요? 어느 테마(theme1)? 텍스트 필드는 title + 4개 마일스톤?"
+사용자: "응 좋아"
+Claude: (PowerPoint에 시안 슬라이드 한 장 추가 — {{title}}, {{m1.label}}, {{m1.desc}}, ...
+         placeholder가 텍스트박스에 박혀있음)
+        "시안 만들었어요. PowerPoint에서 도형 배치 손보고 OK 알려주세요."
+사용자: (PowerPoint에서 직접 디자인 다듬기) "디자인 끝"
+Claude: session.register_layout("milestone_4step", theme="theme1", description="...")
+        → user_layouts/theme1_user.pptx 에 슬라이드 추가
+        → 노트에 메타 자동 박음
+        → placeholders 자동 감지 ({{key}} 스캔)
+        → manifest.json 갱신
+        "등록 완료. 이제 '마일스톤 슬라이드 추가해줘' 하면 자동 인식해요."
+```
+
+이후 다른 PPT 만들 때:
+
+```
+사용자: "마일스톤 4단계 슬라이드 추가해줘. 디자인 → 개발 → 검증 → 배포"
+Claude: session.add_custom("milestone_4step", {
+            "title": "도입 로드맵",
+            "m1.label": "디자인", "m1.desc": "...",
+            ...
+        })
+        → 등록된 시안을 복제 + 텍스트 치환 → 새 PPT에 삽입
+```
+
+**핵심 API**:
+- `session.register_layout(name, theme=..., description=..., placeholders=...)` — 현재 슬라이드를 user_layouts에 등록
+- `session.list_custom_templates(theme=...)` — 등록된 템플릿 목록 조회
+- `session.add_custom(name, mapping)` — 등록된 템플릿으로 새 슬라이드 추가
 
 ### 안전성
 

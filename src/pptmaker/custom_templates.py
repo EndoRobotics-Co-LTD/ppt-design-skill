@@ -189,3 +189,87 @@ def replace_placeholders_com(slide, mapping: dict[str, str]) -> int:
         except Exception:
             continue
     return count
+
+
+def detect_placeholders_in_com_slide(slide) -> list[str]:
+    """COM 슬라이드의 모든 텍스트박스를 스캔해서 {{key}} 키들을 수집.
+
+    중복 제거 + 등장 순서 보존.
+    """
+    seen: dict[str, None] = {}  # ordered set
+    for shape in slide.Shapes:
+        try:
+            if shape.HasTextFrame == -1:
+                text = shape.TextFrame.TextRange.Text or ""
+                for m in PLACEHOLDER_RE.finditer(text):
+                    key = m.group(1).strip()
+                    if key not in seen:
+                        seen[key] = None
+        except Exception:
+            continue
+    return list(seen.keys())
+
+
+def add_to_manifest(template: CustomTemplate, *, overwrite: bool = False) -> None:
+    """manifest.json 에 항목 추가.
+
+    중복 name 발견 시:
+      - overwrite=True → 기존을 새 것으로 교체
+      - overwrite=False → ValueError
+    """
+    items = load_manifest()
+    existing_idx = next((i for i, t in enumerate(items) if t.name == template.name), None)
+    if existing_idx is not None:
+        if not overwrite:
+            raise ValueError(
+                f"이미 등록된 이름: '{template.name}'. overwrite=True 로 덮어쓰거나 다른 이름을 사용하세요."
+            )
+        items[existing_idx] = template
+    else:
+        items.append(template)
+    save_manifest(items)
+
+
+def create_user_pptx_if_missing(theme: str) -> Path:
+    """user_layouts/<theme>_user.pptx 가 없으면 layouts/<theme>.pptx 의 chrome만
+    복사해서 빈 상태로 생성. 있으면 그대로 반환.
+
+    빈 상태 = 데모 본문 슬라이드는 모두 제거하고 cover + closing 만 남김.
+    이후 register_layout() 호출이 슬라이드를 append 한다.
+    """
+    target = themes.user_template_path(theme)
+    if target.exists():
+        return target
+
+    # layouts/<theme>.pptx 복사
+    from pptx import Presentation
+    import shutil
+
+    src = themes.template_path(theme)
+    themes.USER_LAYOUTS_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(str(src), str(target))
+
+    # 데모 본문 슬라이드 (2..N-1) 제거 — cover(1) + closing(last) 만 남김
+    prs = Presentation(str(target))
+    sldIdLst = prs.slides._sldIdLst
+    slide_ids = list(sldIdLst)
+    if len(slide_ids) >= 3:
+        # 첫(cover)과 마지막(closing) 외 다 제거
+        for sid in slide_ids[1:-1]:
+            sldIdLst.remove(sid)
+            try:
+                prs.part.drop_rel(sid.rId)
+            except Exception:
+                pass
+        prs.save(str(target))
+
+    return target
+
+
+def build_meta_line(name: str, placeholders: list[str], description: str = "") -> str:
+    """슬라이드 노트에 들어갈 메타 한 줄 생성."""
+    csv = ",".join(placeholders)
+    base = f"pptmaker:custom name={name} placeholders={csv}"
+    if description:
+        return f"{base}\n{description}"
+    return base

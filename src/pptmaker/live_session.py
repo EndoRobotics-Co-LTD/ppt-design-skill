@@ -392,6 +392,115 @@ class LiveSession:
         from pptmaker import custom_templates
         return custom_templates.list_templates(theme=theme)
 
+    def register_layout(
+        self,
+        name: str,
+        *,
+        theme: str | None = None,
+        slide_index: int | None = None,
+        placeholders: list[str] | None = None,
+        description: str = "",
+        overwrite: bool = False,
+    ) -> dict:
+        """현재 프레젠테이션의 한 슬라이드를 user_layouts 에 커스텀 템플릿으로 등록.
+
+        Phase 2 진입점 — Claude가 사용자와 대화로 시안 슬라이드를 만든 뒤
+        이 메서드 한 번 호출로:
+          1. user_layouts/<theme>_user.pptx 자동 생성 (없으면)
+          2. 지정한 슬라이드를 거기에 append
+          3. 슬라이드 노트에 `pptmaker:custom name=... placeholders=...` 메타 추가
+          4. manifest.json 갱신
+
+        Args:
+            name: 템플릿 이름 (예: "milestone_4step"). 호출자가 향후 add_custom(name, ...)으로 사용.
+            theme: 어느 테마용? None이면 DEFAULT_THEME ('theme1').
+            slide_index: 어느 슬라이드를 등록할지 (1-based). None이면 마지막 슬라이드.
+            placeholders: {{key}} 키 목록. None이면 슬라이드 텍스트에서 자동 감지.
+            description: 사람이 읽는 설명 (선택).
+            overwrite: 같은 name 이 이미 있으면 덮어쓸지.
+
+        Returns:
+            등록 결과 dict (name, theme, source_file, slide_index_in_user_pptx, placeholders, description).
+        """
+        from pptmaker import custom_templates, themes
+
+        theme_name = theme or themes.DEFAULT_THEME
+
+        # 1. 어느 슬라이드를 등록할지 결정.
+        # 기본값: blank_mode면 closing 직전(=가장 최근 본문 슬라이드), 아니면 마지막.
+        if slide_index is not None:
+            idx = slide_index
+        elif getattr(self, "blank_mode", False) and self.slide_count >= 2:
+            idx = self.slide_count - 1  # closing 직전 (방금 추가한 시안)
+        else:
+            idx = self.slide_count
+        if idx < 1 or idx > self.slide_count:
+            raise ValueError(f"slide_index out of range: {idx} (slide_count={self.slide_count})")
+        source_slide = self._prs.Slides(idx)
+
+        # 2. user_layouts/<theme>_user.pptx 준비 (없으면 자동 생성)
+        user_pptx_path = custom_templates.create_user_pptx_if_missing(theme_name)
+
+        # 3. placeholders 자동 감지 (명시 안 됐을 때)
+        if placeholders is None:
+            placeholders = custom_templates.detect_placeholders_in_com_slide(source_slide)
+
+        # 4. 슬라이드를 user_layouts/<theme>_user.pptx 끝에 추가 (PowerPoint COM으로)
+        source_slide.Copy()
+
+        user_prs = self._app.Presentations.Open(
+            str(user_pptx_path.resolve()),
+            ReadOnly=MSO_FALSE,
+            WithWindow=MSO_FALSE,
+        )
+        try:
+            # user_prs 끝에 paste
+            insert_at = user_prs.Slides.Count + 1
+            user_prs.Slides.Paste(insert_at)
+            new_slide = user_prs.Slides(insert_at)
+
+            # 5. 노트에 메타 추가
+            meta_line = custom_templates.build_meta_line(name, placeholders, description)
+            try:
+                # NotesPage 의 첫 placeholder가 노트 텍스트
+                notes_shape = new_slide.NotesPage.Shapes(2)  # 통상 1=슬라이드 썸네일, 2=노트
+                notes_shape.TextFrame.TextRange.Text = meta_line
+            except Exception:
+                # fallback: 모든 노트 shape 시도
+                for sh in new_slide.NotesPage.Shapes:
+                    try:
+                        if sh.HasTextFrame == MSO_TRUE and sh.PlaceholderFormat.Type == 2:  # ppPlaceholderBody
+                            sh.TextFrame.TextRange.Text = meta_line
+                            break
+                    except Exception:
+                        continue
+
+            user_prs.Save()
+            slide_index_in_user_pptx = insert_at
+        finally:
+            user_prs.Close()
+
+        # 6. manifest 갱신
+        tmpl = custom_templates.CustomTemplate(
+            name=name,
+            theme=theme_name,
+            source_file=user_pptx_path.name,
+            source_slide_index=slide_index_in_user_pptx,
+            placeholders=list(placeholders),
+            description=description,
+        )
+        custom_templates.add_to_manifest(tmpl, overwrite=overwrite)
+
+        return {
+            "name": name,
+            "theme": theme_name,
+            "source_file": user_pptx_path.name,
+            "source_slide_index": slide_index_in_user_pptx,
+            "placeholders": list(placeholders),
+            "description": description,
+            "user_pptx_path": str(user_pptx_path),
+        }
+
     def add_custom(self, name: str, mapping: dict[str, str] | None = None,
                    *, theme: str | None = None) -> SlideRef:
         """사용자 커스텀 레이아웃 슬라이드를 closing 직전에 추가.

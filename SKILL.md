@@ -89,7 +89,51 @@ session.add_custom("timeline_4step", {
 })
 ```
 
-**향후 Phase 2**: Claude가 사용자와 대화로 새 레이아웃 디자인을 받아 자동 등록 (현재는 수동).
+### Phase 2 — 대화형 등록 (자동화)
+
+Claude가 사용자와 대화하면서 시안을 만들어 한 번에 등록할 수 있다.
+
+**대화 흐름**:
+
+1. 사용자: "마일스톤 4단계 보여주는 새 레이아웃 추가해줘"
+2. Claude:
+   - 이름 정하기: "이름은 `milestone_4step` 어때요?"
+   - 어느 테마? "theme1?"
+   - 어떤 텍스트 필드? "title + 4개 마일스톤(각 label/desc)?"
+3. Claude가 시안 슬라이드 생성 (작업 중인 PPT에 임시 슬라이드 추가, 텍스트박스에 `{{key}}` placeholder를 박은 상태):
+   ```python
+   session.add_single_column(
+       "{{title}}",
+       tiles=[
+           TileCard(number=1, title="{{m1.label}}", desc="{{m1.desc}}"),
+           # ...
+       ],
+   )
+   ```
+4. PowerPoint에서 사용자가 시안 확인. 디자인 손보고 싶으면 직접 수정 가능.
+5. 사용자: "디자인 OK"
+6. Claude: 한 줄 호출로 등록:
+   ```python
+   session.register_layout(
+       "milestone_4step",
+       theme="theme1",
+       description="프로젝트 마일스톤 4단계",
+   )
+   # → user_layouts/theme1_user.pptx 에 슬라이드 추가
+   # → 노트에 pptmaker:custom 메타 자동 추가
+   # → placeholders 자동 감지 ({{key}} 스캔)
+   # → manifest.json 갱신
+   ```
+7. 이후부터 사용자가 "마일스톤 슬라이드 추가해줘" 라고 하면 Claude가 `add_custom("milestone_4step", {...})` 자동 호출.
+
+**register_layout 옵션**:
+- `theme` — 어느 테마용 (`None`이면 DEFAULT_THEME).
+- `slide_index` — 어느 슬라이드를 등록? (기본: blank_mode면 closing 직전 = 가장 최근 본문, 아니면 마지막)
+- `placeholders` — 명시 시 그 리스트 사용. 생략 시 슬라이드 텍스트박스에서 `{{key}}` 자동 감지.
+- `description` — 사람이 읽는 한 줄 설명 (선택).
+- `overwrite` — 같은 이름이 이미 있으면 덮어쓸지 (기본 False — 거부).
+
+**user_layouts/theme1_user.pptx 가 없을 때**: 첫 register_layout 호출 시 layouts/theme1.pptx 의 chrome만 복사해서 빈 상태로 자동 생성 (cover/closing 만 남고 데모 본문 제거).
 
 ### 1.1 코드 진입점
 
