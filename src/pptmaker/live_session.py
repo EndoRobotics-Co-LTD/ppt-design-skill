@@ -53,6 +53,11 @@ class LiveSession:
         self._app = app
         self._prs = presentation
         self.blank_mode = blank_mode
+        # 자동 시각 fit 활성화 — add_xxx 끝나면 자동 health check + auto fit
+        self.auto_fit_enabled: bool = True
+        # 마지막 add_xxx 직후 남은 시각 issue들 (자동 fix로 해결 안 된 것).
+        # Claude는 이게 비어있지 않으면 사용자에게 옵션을 제시해야 함.
+        self._last_remaining_issues: list = []
 
     # ---------- 진입/연결 ----------
 
@@ -388,6 +393,63 @@ class LiveSession:
         self._prs.Slides(from_index).MoveTo(to_index)
         self.focus(to_index)
 
+    # ---------- 시각 건강 검진 (자동 fit + remaining issues) ----------
+    # 사용자 명시 원칙: 디자인 표준 vs 컨텐츠 fit 충돌 시 **컨텐츠 우선**.
+    # 자동 처리한 fix는 로그로 명확히 표시, 자동 fix로 해결 안 되면 issue 반환.
+
+    def check_health(self, slide_index: int | None = None) -> list:
+        """시각 문제 감지. slide_index=None 이면 전체.
+
+        Returns:
+            list[health.Issue]. 비어있으면 문제 없음.
+        """
+        from pptmaker import health
+        issues = []
+        indices = [slide_index] if slide_index else range(1, self.slide_count + 1)
+        for idx in indices:
+            slide = self._prs.Slides(idx)
+            issues.extend(health.check_slide(slide, idx))
+        return issues
+
+    def auto_fit(self, slide_index: int | None = None, *, verbose: bool = True) -> tuple[list, list]:
+        """자동 fit 시도. slide_index=None 이면 전체.
+
+        전략 (우선순위 순):
+          1. 텍스트 오버플로우 → 박스 높이 확장 (BODY_BOTTOM 한도 내)
+          2. 그래도 오버플로우 → 폰트 Type 스케일 한 단계 축소
+          3. body_bottom 침범 → 박스 높이 줄임
+
+        Returns:
+            (applied_fixes, remaining_issues)
+            remaining_issues 가 있으면 Claude가 사용자에게 옵션 제시.
+        """
+        from pptmaker import health
+        all_fixes = []
+        all_remaining = []
+        indices = [slide_index] if slide_index else range(1, self.slide_count + 1)
+        for idx in indices:
+            slide = self._prs.Slides(idx)
+            fixes, remaining = health.auto_fit_slide(slide, idx)
+            all_fixes.extend(fixes)
+            all_remaining.extend(remaining)
+        if verbose:
+            for fx in all_fixes:
+                print(f"  [auto_fit] {fx}")
+            for iss in all_remaining:
+                print(f"  [REMAIN]   {iss}")
+        return all_fixes, all_remaining
+
+    def _post_add_hook(self, slide_index: int) -> None:
+        """모든 add_xxx 메서드가 끝나기 전에 호출. 자동 fit 적용.
+
+        남는 issue 는 self._last_remaining_issues 에 저장 (caller가 확인 가능).
+        Claude는 이 리스트가 비어있지 않으면 사용자에게 옵션 제시해야 함.
+        """
+        if not getattr(self, "auto_fit_enabled", True):
+            return
+        _, remaining = self.auto_fit(slide_index=slide_index, verbose=False)
+        self._last_remaining_issues = remaining
+
     def get_slide_text(self, slide_index: int) -> str:
         """슬라이드 N의 모든 텍스트박스 텍스트를 줄바꿈으로 연결해서 반환.
 
@@ -418,24 +480,32 @@ class LiveSession:
                   organization: str | None = None, date: str | None = None,
                   subtitle: str | None = None) -> int:
         from pptmaker.slides import cover
-        return cover.add_to_live(self, title, presenter=presenter,
+        idx = cover.add_to_live(self, title, presenter=presenter,
                                  organization=organization, date=date, subtitle=subtitle)
+        self._post_add_hook(idx)
+        return idx
 
     def add_closing(self, message: str = "Thank You", *,
                     presenter: str | None = None, organization: str | None = None,
                     date: str | None = None, subtitle: str | None = None) -> int:
         from pptmaker.slides import closing
-        return closing.add_to_live(self, message, presenter=presenter,
+        idx = closing.add_to_live(self, message, presenter=presenter,
                                    organization=organization, date=date, subtitle=subtitle)
+        self._post_add_hook(idx)
+        return idx
 
     def add_agenda(self, items: list[str], *, title: str = "목차", page: int | None = None) -> int:
         from pptmaker.slides import agenda
-        return agenda.add_to_live(self, items, title=title, page=page)
+        idx = agenda.add_to_live(self, items, title=title, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_section_divider(self, title: str, *, number: int | str | None = None,
                             subtitle: str | None = None, page: int | None = None) -> int:
         from pptmaker.slides import section_divider
-        return section_divider.add_to_live(self, title, number=number, subtitle=subtitle, page=page)
+        idx = section_divider.add_to_live(self, title, number=number, subtitle=subtitle, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_single_column(self, title: str, bullets: list | None = None, *,
                           tiles: list | None = None,
@@ -445,9 +515,11 @@ class LiveSession:
                           page: int | None = None) -> int:
         """1단 본문 슬라이드. tiles 지정 시 Reference 표준 타일 카드, 아니면 불릿 리스트."""
         from pptmaker.slides import single_column
-        return single_column.add_to_live(self, title, bullets, tiles=tiles,
+        idx = single_column.add_to_live(self, title, bullets, tiles=tiles,
                                          eyebrow=eyebrow, subtitle=subtitle,
                                          section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_two_column(self, title: str, left_sub: str, left_items: list,
                        right_sub: str, right_items: list, *,
@@ -456,70 +528,88 @@ class LiveSession:
                        page: int | None = None) -> int:
         """2단 본문 슬라이드. use_tiles=True (기본) = Reference 원형 아이콘 + 타일 카드."""
         from pptmaker.slides import two_column
-        return two_column.add_to_live(self, title, left_sub, left_items,
+        idx = two_column.add_to_live(self, title, left_sub, left_items,
                                        right_sub, right_items,
                                        use_tiles=use_tiles, section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_highlight_quote(self, message: str, *, attribution: str | None = None,
                             section_no: int | None = None,
                             page: int | None = None) -> int:
         from pptmaker.slides import highlight_quote
-        return highlight_quote.add_to_live(self, message, attribution=attribution,
+        idx = highlight_quote.add_to_live(self, message, attribution=attribution,
                                             section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_kpi_cards(self, title: str, cards: list[dict], *,
                       section_no: int | None = None,
                       page: int | None = None) -> int:
         from pptmaker.slides import kpi_cards
-        return kpi_cards.add_to_live(self, title, cards, section_no=section_no, page=page)
+        idx = kpi_cards.add_to_live(self, title, cards, section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_data_table(self, title: str, rows: list[list[str]], *,
                        section_no: int | None = None,
                        page: int | None = None) -> int:
         from pptmaker.slides import data_table
-        return data_table.add_to_live(self, title, rows, section_no=section_no, page=page)
+        idx = data_table.add_to_live(self, title, rows, section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_chart(self, title: str, categories: list[str], series: list[dict], *,
                   chart_type: str = "column", note: str | None = None,
                   section_no: int | None = None,
                   page: int | None = None) -> int:
         from pptmaker.slides import chart
-        return chart.add_to_live(self, title, categories, series,
+        idx = chart.add_to_live(self, title, categories, series,
                                   chart_type=chart_type, note=note,
                                   section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_comparison(self, title: str, left: dict, right: dict, *,
                        arrow_label: str | None = None,
                        section_no: int | None = None,
                        page: int | None = None) -> int:
         from pptmaker.slides import comparison
-        return comparison.add_to_live(self, title, left, right,
+        idx = comparison.add_to_live(self, title, left, right,
                                        arrow_label=arrow_label,
                                        section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_text_image(self, title: str, image_path, subtitle: str, bullets: list[str], *,
                        image_side: str = "left",
                        section_no: int | None = None,
                        page: int | None = None) -> int:
         from pptmaker.slides import text_image
-        return text_image.add_to_live(self, title, image_path, subtitle, bullets,
+        idx = text_image.add_to_live(self, title, image_path, subtitle, bullets,
                                        image_side=image_side,
                                        section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_full_image(self, image_path, *, caption: str | None = None,
                        title: str = "이미지",
                        section_no: int | None = None,
                        page: int | None = None) -> int:
         from pptmaker.slides import full_image
-        return full_image.add_to_live(self, image_path, caption=caption, title=title,
+        idx = full_image.add_to_live(self, image_path, caption=caption, title=title,
                                        section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     def add_process_flow(self, title: str, steps: list[dict], *,
                          section_no: int | None = None,
                          page: int | None = None) -> int:
         from pptmaker.slides import process_flow
-        return process_flow.add_to_live(self, title, steps,
+        idx = process_flow.add_to_live(self, title, steps,
                                          section_no=section_no, page=page)
+        self._post_add_hook(idx)
+        return idx
 
     # ---------- 사용자 커스텀 레이아웃 ----------
 
