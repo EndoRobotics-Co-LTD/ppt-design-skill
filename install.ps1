@@ -1,11 +1,11 @@
 # PPTMaker bootstrap installer
 #
 # Usage (PowerShell one-liner):
-#   irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/endo-claude-skill-ppt-maker/lee-dev/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/ppt-design-skill/lee-dev/install.ps1 | iex
 #
 # What this does:
 #   1) Check Python and Git are installed
-#   2) Clone the repo into the correct location (~/.claude/skills/pptmaker/) — folder name auto-handled
+#   2) Clone the repo into the correct location (~/.claude/skills/ppt-design-skill/) — folder name auto-handled
 #   3) Run setup.ps1 (install Python dependencies + verify)
 #
 # ASCII-only messages so this works under PowerShell 5.1 cp949/cp1252 codepages
@@ -18,10 +18,10 @@ Write-Host "==> PPTMaker bootstrap installer" -ForegroundColor Cyan
 Write-Host ""
 
 # ----- config -----
-$repoUrl = "https://github.com/EndoRobotics-Co-LTD/endo-claude-skill-ppt-maker.git"
+$repoUrl = "https://github.com/EndoRobotics-Co-LTD/ppt-design-skill.git"
 $repoBranch = "lee-dev"  # TODO: change to "main" after merge
 $skillRoot = Join-Path $env:USERPROFILE ".claude\skills"
-$skillDir = Join-Path $skillRoot "pptmaker"
+$skillDir = Join-Path $skillRoot "ppt-design-skill"
 
 # ----- 1) prereq check -----
 Write-Host "[1/4] Checking prerequisites..." -ForegroundColor Cyan

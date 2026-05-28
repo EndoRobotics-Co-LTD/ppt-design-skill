@@ -23,15 +23,34 @@
 
 ## 한 줄 요약
 
-PowerShell 한 줄로 끝:
+두 가지 설치 방법 중 하나 선택. 둘 다 한 줄.
 
-```powershell
-irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/endo-claude-skill-ppt-maker/lee-dev/install.ps1 | iex
+### 방법 1 — `npx skills add` (가장 표준)
+
+```bash
+npx skills add EndoRobotics-Co-LTD/ppt-design-skill
 ```
 
-→ Claude Code 재시작 → 대화창에 **"PPT 만들어줘"** 입력 → 끝.
+- 기본 동작: **현재 폴더의 `.claude/skills/ppt-design-skill/` 에 설치** (project-local).
+- 글로벌 설치 원하면: `npx skills add EndoRobotics-Co-LTD/ppt-design-skill -g`
+- PowerShell, bash, zsh 어디서나 작동.
 
-> 💡 `irm | iex` 패턴은 부트스트랩 스크립트를 다운로드해서 바로 실행합니다. PowerShell 실행 정책 설정 변경 불필요. 내부적으로 올바른 위치(`~/.claude/skills/pptmaker/`)에 클론하고 의존성을 설치합니다.
+> ⚠️ Python 의존성(`python-pptx`, `pywin32`)은 별도 설치 필요:
+> ```powershell
+> cd <스킬 설치된 위치>
+> python -m pip install -e .
+> ```
+
+### 방법 2 — PowerShell 부트스트랩 (Python 의존성도 자동)
+
+```powershell
+irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/ppt-design-skill/lee-dev/install.ps1 | iex
+```
+
+- 자동으로 글로벌(`~/.claude/skills/ppt-design-skill/`)에 클론 + `pip install -e .` + 검증까지.
+- 한 방에 끝.
+
+→ Claude Code 재시작 → 대화창에 **"PPT 만들어줘"** 입력 → 끝.
 
 ---
 
@@ -44,7 +63,7 @@ irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/endo-claude-skill-ppt-
 | **Python** | 3.11 이상 |
 | **Git** | 설치되어 있어야 함 |
 | **Claude Code** | 최신 버전 |
-| **GitHub 접근권** | `EndoRobotics-Co-LTD/endo-claude-skill-ppt-maker` 리포 접근 권한 |
+| **GitHub 접근권** | `EndoRobotics-Co-LTD/ppt-design-skill` 리포 접근 권한 |
 
 설치 전 PowerShell에서 확인:
 
@@ -65,28 +84,28 @@ git --version       # git version 2.x.x 같은 출력
 PowerShell을 열고 **한 줄**:
 
 ```powershell
-irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/endo-claude-skill-ppt-maker/lee-dev/install.ps1 | iex
+irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/ppt-design-skill/lee-dev/install.ps1 | iex
 ```
 
 이 명령이 자동으로:
 1. Python/Git 설치 여부 확인
-2. 스킬을 **정확한 위치** (`~/.claude/skills/pptmaker/`) 에 클론 — 폴더 이름 자동 처리
+2. 스킬을 **정확한 위치** (`~/.claude/skills/ppt-design-skill/`) 에 클론 — 폴더 이름 자동 처리
 3. Python 패키지 설치 (`python-pptx`, `pywin32`, `pptmaker`)
 4. 설치 검증
 
 마지막에 `전체 설치 완료` 메시지가 보이면 OK.
 
 > ⚠️ **왜 `git clone <url>` 직접 안 됨?**
-> 기본 `git clone`은 리포 이름(`endo-claude-skill-ppt-maker`) 그대로 폴더를 만드는데, Claude Code는 `~/.claude/skills/pptmaker/` 를 기대합니다. 이름이 다르면 스킬을 못 찾아요. `install.ps1`이 이 문제를 자동으로 해결합니다.
+> 기본 `git clone`은 리포 이름(`ppt-design-skill`) 그대로 폴더를 만드는데, Claude Code는 `~/.claude/skills/ppt-design-skill/` 를 기대합니다. 이름이 다르면 스킬을 못 찾아요. `install.ps1`이 이 문제를 자동으로 해결합니다.
 
 ### 방법 B — 수동 (자동이 실패하면)
 
 ```powershell
 # 1) 스킬 폴더에 클론 — 두 번째 인자에 목적지 명시 (중요!)
-git clone https://github.com/EndoRobotics-Co-LTD/endo-claude-skill-ppt-maker.git $env:USERPROFILE\.claude\skills\pptmaker
+git clone https://github.com/EndoRobotics-Co-LTD/ppt-design-skill.git $env:USERPROFILE\.claude\skills\ppt-design-skill
 
 # 2) Python 의존성 설치
-cd $env:USERPROFILE\.claude\skills\pptmaker
+cd $env:USERPROFILE\.claude\skills\ppt-design-skill
 python -m pip install -e .
 
 # 3) 설치 검증
@@ -95,7 +114,7 @@ python -c "from pptmaker import TOKENS; print('OK', TOKENS.colors.accent1)"
 
 기대 출력: `OK #156082`
 
-> 💡 `git clone <url> <목적지>` 형식이 핵심. 목적지를 생략하면 `endo-claude-skill-ppt-maker/` 폴더가 만들어져서 Claude Code가 못 찾습니다.
+> 💡 `git clone <url> <목적지>` 형식이 핵심. 목적지를 생략하면 `ppt-design-skill/` 폴더가 만들어져서 Claude Code가 못 찾습니다.
 
 ### 설치 후 한 번
 
@@ -323,7 +342,7 @@ Claude: session = LiveSession.open_existing("~/Desktop/2026Q1.pptx")
 ### 위치
 
 ```
-~/.claude/skills/pptmaker/user_layouts/    ← gitignored, 사용자별 fork
+~/.claude/skills/ppt-design-skill/user_layouts/    ← gitignored, 사용자별 fork
 ├── theme1_user.pptx                       ← 사용자가 직접 만든 .pptx (한 파일에 여러 슬라이드)
 └── manifest.json                          ← (선택) 자동 생성 가능한 메타 캐시
 ```
@@ -408,7 +427,7 @@ Claude: session.add_custom("milestone_4step", {
 새 디자인 가이드 / 새 레이아웃 / 버그 수정이 배포되면:
 
 ```powershell
-cd $env:USERPROFILE\.claude\skills\pptmaker
+cd $env:USERPROFILE\.claude\skills\ppt-design-skill
 git pull
 python -m pip install -e . --upgrade
 ```
@@ -423,8 +442,8 @@ Claude Code 재시작 → 변경사항 자동 반영.
 
 | 증상 | 해결 |
 |---|---|
-| `/pptmaker` 자동완성이 안 보임 | Claude Code 완전 종료 후 재시작. 그래도 안 되면 `~/.claude/skills/pptmaker/SKILL.md` 파일 존재 확인. 폴더 이름이 `endo-claude-skill-ppt-maker` 같이 되어있으면 `pptmaker` 로 rename 하거나 install.ps1로 재설치 |
-| Python 임포트 에러 (`ModuleNotFoundError: pptmaker`) | `cd $env:USERPROFILE\.claude\skills\pptmaker; python -m pip install -e .` 재실행 |
+| `/ppt-design-skill` 자동완성이 안 보임 | Claude Code 완전 종료 후 재시작. 그래도 안 되면 `~/.claude/skills/ppt-design-skill/SKILL.md` 파일 존재 확인. 디렉토리 이름이 다르면 install.ps1 또는 `npx skills add` 로 재설치 |
+| Python 임포트 에러 (`ModuleNotFoundError: pptmaker`) | `cd $env:USERPROFILE\.claude\skills\ppt-design-skill; python -m pip install -e .` 재실행 |
 | PowerPoint COM 에러 | PowerPoint 데스크톱앱을 한 번 직접 실행해 정상 동작 확인 후 재시도. Microsoft 365 라이선스 활성화 필요 |
 | 차트 데이터 표(mini Excel)가 안 닫힘 | 수동으로 닫기. 다음 슬라이드는 정상 작동 |
 | 한글이 콘솔에 깨져 보임 | `$env:PYTHONIOENCODING="utf-8"` 설정. PPT 안의 한글은 항상 정상 |
