@@ -1,5 +1,5 @@
 ---
-name: ppt-design-skill
+name: ppt-brand-design
 description: EndoRobotics 전사 표준 PPT 빌더 — 사내 디자인 표준(맑은 고딕, accent1 #156082, 16:9, theme1/theme2 chrome)을 강제하며 14종 레이아웃으로 PPT를 대화형 생성·수정한다. 사용자가 PPT·슬라이드·덱(deck)·발표자료·IR·주간보고·경영보고·사외발표를 만들거나, "한 장 더 추가해줘"·"이 부분 바꿔줘"·"슬라이드 순서 바꿔줘"·"새 레이아웃 등록" 같은 PPT 수정·확장 요청을 할 때 반드시 호출. 사용자가 EndoRobotics 표준을 명시하지 않아도 일단 진입해 적용 여부를 묻는다. Windows + PowerPoint 데스크톱 + Claude Code 대화창 실시간 페어 워크플로우.
 ---
 
