@@ -14,7 +14,9 @@ venv/
 ~$*.docx
 
 # Reference: 사내 실제 발표 자료 (외부 배포 금지, 전사 git 배포에서 제외)
+# 멀티 스킬 구조라 모든 위치에서 매칭 (root 및 skills/*/Reference/ 둘 다 커버)
 Reference/
+**/Reference/
 
 # OS
 Thumbs.db
@@ -36,6 +38,8 @@ output/
 
 # Local 작업 폴더 (디버그 PNG, 임시 스크립트, 백업 등 — 배포 불필요)
 .compare/
+**/.compare/
 
 # 사용자별 커스텀 레이아웃 (각 PC에서 추가, 사내 배포 안 함 — git pull 안전)
 user_layouts/
+**/user_layouts/

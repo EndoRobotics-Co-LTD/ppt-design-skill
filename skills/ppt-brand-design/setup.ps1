@@ -1,7 +1,7 @@
 # PPTMaker setup script (Windows PowerShell)
 #
 # This script is called by install.ps1 after cloning. You can also run it directly:
-#   & "$env:USERPROFILE\.claude\skills\ppt-design-skill\setup.ps1"
+#   & "$env:USERPROFILE\.claude\skills\ppt-brand-design\setup.ps1"
 #
 # What it does:
 #   1) Verify Python is available
@@ -77,8 +77,8 @@ if ($skillDir -like "$claudeSkillsRoot*") {
 } else {
     Write-Host "  [!] This directory is NOT under ~/.claude/skills/" -ForegroundColor Yellow
     Write-Host "      For Claude Code auto-detection, do one of:"
-    Write-Host "      1) Re-clone into $claudeSkillsRoot\ppt-design-skill (recommended: use install.ps1)"
-    Write-Host "      2) Create a junction: New-Item -ItemType Junction -Path $claudeSkillsRoot\ppt-design-skill -Target $skillDir"
+    Write-Host "      1) Re-clone into $claudeSkillsRoot\ppt-brand-design (recommended: use install.ps1)"
+    Write-Host "      2) Create a junction: New-Item -ItemType Junction -Path $claudeSkillsRoot\ppt-brand-design -Target $skillDir"
 }
 
 Write-Host ""

@@ -1,27 +1,32 @@
-# PPTMaker bootstrap installer
+# ppt-brand-design bootstrap installer
 #
 # Usage (PowerShell one-liner):
-#   irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/ppt-design-skill/lee-dev/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/EndoRobotics-Co-LTD/endo-skills/main/skills/ppt-brand-design/install.ps1 | iex
 #
 # What this does:
 #   1) Check Python and Git are installed
-#   2) Clone the repo into the correct location (~/.claude/skills/ppt-design-skill/) — folder name auto-handled
+#   2) Clone endo-skills repo to a temp folder, extract skills/ppt-brand-design/
+#      → ~/.claude/skills/ppt-brand-design/  (correct location for Claude Code)
 #   3) Run setup.ps1 (install Python dependencies + verify)
 #
-# ASCII-only messages so this works under PowerShell 5.1 cp949/cp1252 codepages
-# without BOM/encoding issues.
+# Alternative: `npx skills add EndoRobotics-Co-LTD/endo-skills -s ppt-brand-design`
+# (npx 만 사용, Python deps 는 수동으로 `pip install -e .` 필요)
+#
+# ASCII-only messages so this works under PowerShell 5.1 cp949/cp1252 codepages.
 
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
-Write-Host "==> PPTMaker bootstrap installer" -ForegroundColor Cyan
+Write-Host "==> ppt-brand-design bootstrap installer" -ForegroundColor Cyan
 Write-Host ""
 
 # ----- config -----
-$repoUrl = "https://github.com/EndoRobotics-Co-LTD/ppt-design-skill.git"
-$repoBranch = "lee-dev"  # TODO: change to "main" after merge
+$repoUrl = "https://github.com/EndoRobotics-Co-LTD/endo-skills.git"
+$repoBranch = "main"
+$skillName = "ppt-brand-design"
+$repoSkillPath = "skills/$skillName"
 $skillRoot = Join-Path $env:USERPROFILE ".claude\skills"
-$skillDir = Join-Path $skillRoot "ppt-design-skill"
+$skillDir = Join-Path $skillRoot $skillName
 
 # ----- 1) prereq check -----
 Write-Host "[1/4] Checking prerequisites..." -ForegroundColor Cyan
@@ -60,28 +65,25 @@ if (Test-Path $skillDir) {
     Write-Host "  [!] Already installed: $skillDir" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  To update:" -ForegroundColor Yellow
-    Write-Host "    cd $skillDir" -ForegroundColor White
-    Write-Host "    git pull" -ForegroundColor White
-    Write-Host "    python -m pip install -e . --upgrade" -ForegroundColor White
-    Write-Host ""
-    Write-Host "  To reinstall, remove the existing folder first:" -ForegroundColor Yellow
     Write-Host "    Remove-Item -Recurse -Force $skillDir" -ForegroundColor White
+    Write-Host "    Then re-run this installer" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  (Note: endo-skills repo is multi-skill — direct git pull from $skillDir won't work" -ForegroundColor Yellow
+    Write-Host "   because only the ppt-brand-design subfolder was extracted.)" -ForegroundColor Yellow
     return
 }
 
-# ----- 4) clone (explicit destination) -----
+# ----- 4) clone + extract skills/ppt-brand-design/ -----
 Write-Host ""
-Write-Host "[3/4] Cloning repo..." -ForegroundColor Cyan
-Write-Host "  $repoUrl"
+Write-Host "[3/4] Cloning endo-skills repo and extracting $skillName..." -ForegroundColor Cyan
+Write-Host "  $repoUrl (branch: $repoBranch)"
 Write-Host "  -> $skillDir"
-Write-Host "  (branch: $repoBranch)"
 
-# Run git clone without redirecting stderr — git writes "Cloning into..." to
-# stderr, which PowerShell 5.1 wraps into ErrorRecord and triggers $ErrorActionPreference="Stop".
-# Temporarily relax error handling and check exit code instead.
+$tempDir = Join-Path $env:TEMP ("endo-skills-" + [Guid]::NewGuid().ToString())
+
 $prevErr = $ErrorActionPreference
 $ErrorActionPreference = "Continue"
-& git clone --branch $repoBranch $repoUrl $skillDir
+& git clone --depth 1 --branch $repoBranch $repoUrl $tempDir
 $cloneExit = $LASTEXITCODE
 $ErrorActionPreference = $prevErr
 
@@ -90,11 +92,24 @@ if ($cloneExit -ne 0) {
     Write-Host "  [X] Clone failed (exit $cloneExit)" -ForegroundColor Red
     Write-Host ""
     Write-Host "  Possible causes:" -ForegroundColor Yellow
-    Write-Host "    - No GitHub access: contact Strategic Planning Team (Eunsang Lee)"
     Write-Host "    - Network/firewall issue: contact internal IT"
+    Write-Host "    - Repo doesn't exist or visibility changed"
+    if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
     return
 }
-Write-Host "  [OK] Clone complete" -ForegroundColor Green
+
+$sourceSkillPath = Join-Path $tempDir $repoSkillPath
+if (-not (Test-Path $sourceSkillPath)) {
+    Write-Host "  [X] Skill folder not found in repo: $repoSkillPath" -ForegroundColor Red
+    Remove-Item -Recurse -Force $tempDir
+    return
+}
+
+# Move skills/ppt-brand-design contents to ~/.claude/skills/ppt-brand-design/
+Move-Item -Path $sourceSkillPath -Destination $skillDir
+# Cleanup temp clone
+Remove-Item -Recurse -Force $tempDir
+Write-Host "  [OK] Extracted to $skillDir" -ForegroundColor Green
 
 # ----- 5) run setup.ps1 -----
 $setupPath = Join-Path $skillDir "setup.ps1"
@@ -119,14 +134,14 @@ if ($LASTEXITCODE -ne 0) {
 # ----- success -----
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Green
-Write-Host " Installation complete" -ForegroundColor Green
+Write-Host " Installation complete: $skillName" -ForegroundColor Green
 Write-Host "================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1) Fully restart Claude Code"
 Write-Host "  2) Run Claude Code from any folder"
-Write-Host "  3) Type your request in chat — Korean or English natural language"
-Write-Host "     Examples: /pptmaker  |  make me an IR deck in EndoRobotics standard"
+Write-Host "  3) Type your request in chat (Korean or English natural language)"
+Write-Host "     Examples: 'PPT 만들어줘'  |  'make me an IR deck'"
 Write-Host "     See README.md for the full conversation flow."
 Write-Host ""
 Write-Host "Skill location: $skillDir" -ForegroundColor White
